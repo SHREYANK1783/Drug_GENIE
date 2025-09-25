@@ -18,12 +18,12 @@ const protect = expressAsyncHandler(async (req: AuthRequest, res: Response, next
       next();
     } catch (error) {
       res.status(401);            
-      throw new Error('Not authorized, token failed');             
+      throw new Error('Not authorized, token failed');                    
     }
   }
   if (!token) {                
     res.status(401);                      
-    throw new Error('Not authorized, no token');                     
+    throw new Error('Not authorized, no token');                                              
   }
 });
 
