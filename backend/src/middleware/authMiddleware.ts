@@ -27,4 +27,4 @@ const protect = expressAsyncHandler(async (req: AuthRequest, res: Response, next
   }
 });
 
-export { protect };                                             
+export { protect };                                                            
