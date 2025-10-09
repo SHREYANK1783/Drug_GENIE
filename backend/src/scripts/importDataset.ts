@@ -35,9 +35,9 @@ const importDataset = async () => {
     console.log(`Successfully imported ${result.length} medicines`);
 
     await mongoose.connection.close();
-    console.log('Database connection closed');
+    console.log('Database connection closed');                 
   } catch (error) {
-    console.error('Error importing dataset:', error);
+    console.error('Error importing dataset:', error);                          
     process.exit(1);
   }
 };
