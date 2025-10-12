@@ -40,7 +40,7 @@ const importDataset = async () => {
     console.error('Error importing dataset:', error);                          
     process.exit(1);
   }
-};
+};             
 
 // Run the script
 importDataset();
