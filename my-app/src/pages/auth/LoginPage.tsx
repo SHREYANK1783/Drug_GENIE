@@ -81,7 +81,7 @@ const LoginPage: React.FC = () => {
               <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl">
                 <Heart className="h-8 w-8 text-white" />
               </div>
-              <h1 className="text-3xl font-bold">MediAI</h1>
+              <h1 className="text-3xl font-bold">Drug GENIE</h1>
             </div>
 
             <h2 className="text-4xl font-bold mb-6 leading-tight">
@@ -139,7 +139,7 @@ const LoginPage: React.FC = () => {
               <div className="p-3 bg-blue-500 rounded-2xl">
                 <Heart className="h-8 w-8 text-white" />
               </div>
-              <h1 className="text-2xl font-bold text-gray-900">MediAI</h1>
+              <h1 className="text-2xl font-bold text-gray-900">Drug GENIE</h1>
             </div>
           </div>
 
@@ -222,7 +222,7 @@ const LoginPage: React.FC = () => {
                   </span>
                 </label>
                 <Link
-                  to="#"
+                  to="/forgot-password"
                   className="text-sm text-blue-600 hover:text-blue-500 font-medium"
                 >
                   Forgot password?

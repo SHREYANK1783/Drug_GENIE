@@ -115,15 +115,24 @@ const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen }) => {
             Quick Actions
           </h3>
           <div className="space-y-2">
-            <button className="w-full text-left px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
+            <Link
+              to="/reminders"
+              className="w-full text-left px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg transition-colors block"
+            >
               📋 View Medical History
-            </button>
-            <button className="w-full text-left px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
+            </Link>
+            <Link
+              to="/contact"
+              className="w-full text-left px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg transition-colors block"
+            >
               📞 Emergency Contacts
-            </button>
-            <button className="w-full text-left px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
+            </Link>
+            <Link
+              to="/profile"
+              className="w-full text-left px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg transition-colors block"
+            >
               ⚙️ Settings & Privacy
-            </button>
+            </Link>
           </div>
         </div>
       </nav>

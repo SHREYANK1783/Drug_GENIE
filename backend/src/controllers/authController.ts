@@ -9,6 +9,22 @@ import { AuthRequest } from '../middleware/authMiddleware';
 const registerUser = expressAsyncHandler(async (req: Request, res: Response) => {
   const { name, email, password, age, bloodGroup, gender } = req.body;
 
+  // Validate password strength
+  if (password.length < 6) {
+    res.status(400);
+    throw new Error('Password must be at least 6 characters long');
+  }
+
+  if (!/[A-Z]/.test(password)) {
+    res.status(400);
+    throw new Error('Password must contain at least one uppercase letter');
+  }
+
+  if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+    res.status(400);
+    throw new Error('Password must contain at least one special character');
+  }
+
   // Check if user exists
   const userExists = await User.findOne({ email });
 
