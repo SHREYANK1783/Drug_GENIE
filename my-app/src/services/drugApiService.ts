@@ -364,5 +364,5 @@ class DrugApiService {
   }
 }
 
-export const drugApiService = new DrugApiService();   
+export const drugApiService = new DrugApiService();                       
   
