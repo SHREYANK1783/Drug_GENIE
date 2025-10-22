@@ -354,7 +354,7 @@ class DrugApiService {
       const key = `${interaction.drug1}-${interaction.drug2}-${interaction.description}`;
       if (seen.has(key)) return false;
       seen.add(key);
-      return true;             
+      return true;                 
     });                     
         
     return unique.sort((a, b) => {
@@ -364,5 +364,5 @@ class DrugApiService {
   }
 }
 
-export const drugApiService = new DrugApiService();                                                                                        
+export const drugApiService = new DrugApiService                    ();                                                                                        
   
