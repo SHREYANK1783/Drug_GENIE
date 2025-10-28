@@ -90,6 +90,20 @@ export const authAPI = {
       body: JSON.stringify(passwordData),
     });
   },
+
+  deleteAccount: async (password: string): Promise<{ message: string; success: boolean }> => {
+    return apiRequest('/api/auth/delete-account', {
+      method: 'DELETE',
+      body: JSON.stringify({ password }),
+    });
+  },
+
+  uploadProfilePhoto: async (photoData: string): Promise<{ message: string; profilePhoto: string }> => {
+    return apiRequest('/api/auth/upload-photo', {
+      method: 'POST',
+      body: JSON.stringify({ photoData }),
+    });
+  },
 };
 
 // Reminders API

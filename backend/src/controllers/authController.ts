@@ -169,4 +169,95 @@ const changeUserPassword = expressAsyncHandler(async (req: AuthRequest, res: Res
   res.json({ message: 'Password changed successfully' });
 });
 
-export { registerUser, loginUser, getUserProfile, updateUserProfile, changeUserPassword };
+// Delete user account
+const deleteAccount = expressAsyncHandler(async (req: AuthRequest, res: Response) => {
+  const user = await User.findById(req.user?.id);
+
+  if (!user) {
+    res.status(404);
+    throw new Error('User not found');
+  }
+
+  const { password } = req.body;
+
+  // Verify password before deleting account
+  if (!password || !(await user.matchPassword(password))) {
+    res.status(401);
+    throw new Error('Password is incorrect. Account deletion cancelled.');
+  }
+
+  // Delete user's related data (cascade delete)
+  // Import models at the top if needed
+  const Reminder = require('../models/reminderModel').default;
+  const BloodRequest = require('../models/bloodRequestModel').default;
+  const Notification = require('../models/notificationModel').default;
+  const DrugInteractionLog = require('../models/drugInteractionLogModel').default;
+  const AIConsultationLog = require('../models/aiConsultationLogModel').default;
+
+  await Promise.all([
+    Reminder.deleteMany({ userId: user._id }),
+    BloodRequest.deleteMany({ requesterId: user._id }),
+    Notification.deleteMany({ userId: user._id }),
+    DrugInteractionLog.deleteMany({ userId: user._id }),
+    AIConsultationLog.deleteMany({ userId: user._id }),
+  ]);
+
+  // Delete user account
+  await user.deleteOne();
+
+  res.json({ 
+    message: 'Account deleted successfully. All your data has been removed.',
+    success: true 
+  });
+});
+
+// Upload profile photo
+const uploadProfilePhoto = expressAsyncHandler(async (req: AuthRequest, res: Response) => {
+  const user = await User.findById(req.user?.id);
+
+  if (!user) {
+    res.status(404);
+    throw new Error('User not found');
+  }
+
+  const { photoData } = req.body;
+
+  if (!photoData) {
+    res.status(400);
+    throw new Error('No photo data provided');
+  }
+
+  // Validate base64 image data
+  if (!photoData.startsWith('data:image/')) {
+    res.status(400);
+    throw new Error('Invalid image format');
+  }
+
+  // Check file size (limit to 5MB)
+  const sizeInBytes = (photoData.length * 3) / 4;
+  const sizeInMB = sizeInBytes / (1024 * 1024);
+  
+  if (sizeInMB > 5) {
+    res.status(400);
+    throw new Error('Image size must be less than 5MB');
+  }
+
+  // Save base64 image data to user profile
+  user.profilePhoto = photoData;
+  await user.save();
+
+  res.json({
+    message: 'Profile photo uploaded successfully',
+    profilePhoto: user.profilePhoto,
+  });
+});
+
+export { 
+  registerUser, 
+  loginUser, 
+  getUserProfile, 
+  updateUserProfile, 
+  changeUserPassword,
+  deleteAccount,
+  uploadProfilePhoto
+};

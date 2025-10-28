@@ -6,6 +6,7 @@ export interface User {
   bloodGroup: string;
   gender: string;
   phone?: string;
+  profilePhoto?: string;
   createdAt: Date;
 }
 

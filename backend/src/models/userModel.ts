@@ -10,6 +10,7 @@ export interface IUser extends Document {
   bloodGroup: string;
   gender: string;
   phone?: string;
+  profilePhoto?: string;
   createdAt: Date;
   updatedAt: Date;
   matchPassword(enteredPassword: string): Promise<boolean>;
@@ -26,6 +27,7 @@ const userSchema = new mongoose.Schema<IUser, IUserModel>({
   bloodGroup: { type: String, required: true },
   gender: { type: String, required: true },
   phone: { type: String, required: false },
+  profilePhoto: { type: String, required: false },
 }, { timestamps: true });
 
 // Middleware to hash password before saving a user

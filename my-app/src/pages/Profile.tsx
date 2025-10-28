@@ -31,7 +31,7 @@ const Profile: React.FC = () => {
   const [show2FAModal, setShow2FAModal] = useState(false);
   const [showSessionsModal, setShowSessionsModal] = useState(false);
   const [showRetentionModal, setShowRetentionModal] = useState(false);
-  const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
+  const [profilePhoto, setProfilePhoto] = useState<string | null>(currentUser?.profilePhoto || null);
 
   const [profileData, setProfileData] = useState({
     name: currentUser?.name || '',
@@ -102,11 +102,23 @@ const Profile: React.FC = () => {
     navigate('/login');
   };
 
-  const handleDeleteAccount = () => {
-    if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
-      // TODO: Implement API call to delete account
-      logoutUser();
-      navigate('/signup');
+  const handleDeleteAccount = async () => {
+    const password = prompt('Please enter your password to confirm account deletion:');
+    
+    if (!password) {
+      return; // User cancelled
+    }
+
+    if (confirm('Are you sure you want to delete your account? This action cannot be undone. All your data will be permanently deleted.')) {
+      try {
+        const response = await authAPI.deleteAccount(password);
+        alert(response.message || 'Account deleted successfully');
+        logoutUser();
+        navigate('/signup');
+      } catch (error: any) {
+        alert(error.response?.data?.message || 'Failed to delete account. Please check your password.');
+        console.error('Error deleting account:', error);
+      }
     }
   };
 
@@ -115,17 +127,36 @@ const Profile: React.FC = () => {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
-    input.onchange = (e: Event) => {
+    input.onchange = async (e: Event) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (file) {
         if (file.size > 5 * 1024 * 1024) {
-          console.error('Image size must be less than 5MB');
+          alert('Image size must be less than 5MB');
           return;
         }
         const reader = new FileReader();
-        reader.onload = (event) => {
-          setProfilePhoto(event.target?.result as string);
-          // TODO: Upload to server
+        reader.onload = async (event) => {
+          const photoData = event.target?.result as string;
+          setProfilePhoto(photoData);
+          
+          // Upload to server
+          try {
+            const response = await authAPI.uploadProfilePhoto(photoData);
+            alert('Profile photo uploaded successfully!');
+            // Update user in storage
+            const updatedUser = { ...currentUser, profilePhoto: response.profilePhoto };
+            updateUser(updatedUser as any);
+          } catch (error: any) {
+            const errorMessage = error.message || error.response?.data?.message || 'Failed to upload photo';
+            alert(`Error: ${errorMessage}`);
+            console.error('Error uploading photo:', error);
+            console.error('Error details:', {
+              message: error.message,
+              response: error.response,
+              stack: error.stack
+            });
+            setProfilePhoto(currentUser?.profilePhoto || '');
+          }
         };
         reader.readAsDataURL(file);
       }
