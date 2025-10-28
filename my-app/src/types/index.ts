@@ -5,6 +5,7 @@ export interface User {
   age: number;
   bloodGroup: string;
   gender: string;
+  phone?: string;
   createdAt: Date;
 }
 

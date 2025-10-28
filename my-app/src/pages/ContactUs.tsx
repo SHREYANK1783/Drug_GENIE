@@ -12,7 +12,6 @@ import {
   Linkedin,
   CheckCircle,
 } from 'lucide-react';
-import toast from 'react-hot-toast';
 
 const ContactUs: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -31,7 +30,6 @@ const ContactUs: React.FC = () => {
     // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1500));
 
-    toast.success('Message sent successfully! We\'ll get back to you soon.');
     setIsSubmitted(true);
     setIsSubmitting(false);
 
@@ -100,9 +98,9 @@ const ContactUs: React.FC = () => {
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.1 }}
-          className="lg:col-span-2 bg-white rounded-2xl p-8 shadow-lg border border-gray-100"
+          className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-lg border border-gray-100 dark:border-gray-700 transition-colors duration-200"
         >
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Send us a Message</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">Send us a Message</h2>
 
           {isSubmitted ? (
             <motion.div
@@ -111,8 +109,8 @@ const ContactUs: React.FC = () => {
               className="text-center py-12"
             >
               <CheckCircle className="h-20 w-20 text-green-500 mx-auto mb-4" />
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">Message Sent!</h3>
-              <p className="text-gray-600">
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Message Sent!</h3>
+              <p className="text-gray-600 dark:text-gray-300">
                 Thank you for contacting us. We'll respond within 24 hours.
               </p>
             </motion.div>
@@ -120,7 +118,7 @@ const ContactUs: React.FC = () => {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                     Your Name *
                   </label>
                   <input
@@ -128,13 +126,13 @@ const ContactUs: React.FC = () => {
                     required
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                     placeholder="John Doe"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                     Email Address *
                   </label>
                   <input
@@ -142,7 +140,7 @@ const ContactUs: React.FC = () => {
                     required
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                     placeholder="john@example.com"
                   />
                 </div>
@@ -207,8 +205,8 @@ const ContactUs: React.FC = () => {
           className="space-y-6"
         >
           {/* Contact Info Cards */}
-          <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
-            <h3 className="text-lg font-bold text-gray-900 mb-4">Contact Information</h3>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-100 dark:border-gray-700 transition-colors duration-200">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">Contact Information</h3>
             <div className="space-y-4">
               {contactInfo.map((info, index) => (
                 <motion.div
@@ -224,18 +222,18 @@ const ContactUs: React.FC = () => {
                     <info.icon className={`h-5 w-5 text-${info.color}-600`} />
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-semibold text-gray-900">{info.title}</p>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">{info.title}</p>
                     {info.link ? (
                       <a
                         href={info.link}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-sm text-gray-600 hover:text-blue-600 transition-colors"
+                        className="text-sm text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                       >
                         {info.value}
                       </a>
                     ) : (
-                      <p className="text-sm text-gray-600">{info.value}</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-300">{info.value}</p>
                     )}
                   </div>
                 </motion.div>
@@ -244,8 +242,8 @@ const ContactUs: React.FC = () => {
           </div>
 
           {/* Social Media */}
-          <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
-            <h3 className="text-lg font-bold text-gray-900 mb-4">Follow Us</h3>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-100 dark:border-gray-700 transition-colors duration-200">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">Follow Us</h3>
             <div className="flex space-x-3">
               {socialLinks.map((social, index) => (
                 <motion.a

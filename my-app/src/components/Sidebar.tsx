@@ -34,12 +34,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen }) => {
       initial={{ x: -300, opacity: 0 }}
       animate={{ x: isSidebarOpen ? 0 : -300, opacity: isSidebarOpen ? 1 : 0 }}
       transition={{ duration: 0.3 }}
-      className="fixed left-0 top-20 h-[calc(100vh-5rem)] w-72 bg-white/95 backdrop-blur-sm shadow-xl border-r border-gray-200 pt-6 overflow-y-auto z-40"
+      className="fixed left-0 top-20 h-[calc(100vh-5rem)] w-72 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm shadow-xl border-r border-gray-200 dark:border-gray-700 pt-6 overflow-y-auto z-40 transition-colors duration-200"
     >
       <nav className="px-4">
         {/* Menu */}
         <div className="mb-8">
-          <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4 px-4">
+          <h2 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4 px-4">
             Healthcare Tools
           </h2>
           <ul className="space-y-2">
@@ -56,15 +56,15 @@ const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen }) => {
                     to={item.href}
                     className={`group flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
                       isActive
-                        ? `${item.bgColor} ${item.color} shadow-md border-l-4 border-current`
-                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                        ? `${item.bgColor} dark:bg-gray-700 text-cyan-600 shadow-md border-l-4 border-cyan-600`
+                        : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100'
                     }`}
                   >
                     <div className={`mr-4 p-2 rounded-lg transition-all ${
-                      isActive ? 'bg-white shadow-sm' : 'group-hover:bg-white group-hover:shadow-sm'
+                      isActive ? 'bg-white dark:bg-gray-600 shadow-sm' : 'group-hover:bg-white dark:group-hover:bg-gray-600 group-hover:shadow-sm'
                     }`}>
                       <item.icon className={`h-5 w-5 transition-colors ${
-                        isActive ? item.color : 'text-gray-400 group-hover:text-gray-600'
+                        isActive ? 'text-cyan-600' : 'text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300'
                       }`} />
                     </div>
                     <span className="flex-1">{item.name}</span>
@@ -87,23 +87,23 @@ const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen }) => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="mx-4 p-4 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl border border-blue-200"
+          className="mx-4 p-4 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/30 dark:to-cyan-900/30 rounded-xl border border-blue-200 dark:border-blue-800"
         >
           <div className="flex items-center space-x-3 mb-3">
             <div className="p-2 bg-blue-500 rounded-lg">
               <Activity className="h-4 w-4 text-white" />
             </div>
-            <h3 className="font-semibold text-gray-900">Health Score</h3>
+            <h3 className="font-semibold text-gray-900 dark:text-gray-100">Health Score</h3>
           </div>
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
-              <span className="text-gray-600">Overall</span>
+              <span className="text-gray-600 dark:text-gray-300">Overall</span>
               <span className="font-semibold text-green-600">85%</span>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
+            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
               <div className="bg-gradient-to-r from-green-400 to-blue-500 h-2 rounded-full w-4/5"></div>
             </div>
-            <p className="text-xs text-gray-500 mt-2">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
               Great job! Keep taking your medications on time.
             </p>
           </div>
@@ -111,25 +111,25 @@ const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen }) => {
 
         {/* Quick Actions */}
         <div className="mx-4 mt-6">
-          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+          <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
             Quick Actions
           </h3>
           <div className="space-y-2">
             <Link
               to="/reminders"
-              className="w-full text-left px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg transition-colors block"
+              className="w-full text-left px-3 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors block"
             >
               📋 View Medical History
             </Link>
             <Link
               to="/contact"
-              className="w-full text-left px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg transition-colors block"
+              className="w-full text-left px-3 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors block"
             >
               📞 Emergency Contacts
             </Link>
             <Link
               to="/profile"
-              className="w-full text-left px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg transition-colors block"
+              className="w-full text-left px-3 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors block"
             >
               ⚙️ Settings & Privacy
             </Link>

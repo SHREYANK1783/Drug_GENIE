@@ -57,15 +57,15 @@ const SymptomChecker: React.FC = () => {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
+        className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 transition-colors duration-200"
       >
         <div className="flex items-center space-x-3">
-          <div className="p-3 bg-indigo-100 rounded-full">
-            <Stethoscope className="h-6 w-6 text-indigo-600" />
+          <div className="p-3 bg-indigo-100 dark:bg-indigo-900 rounded-full">
+            <Stethoscope className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">AI Symptom Checker</h1>
-            <p className="text-gray-600">Get preliminary health insights by describing your symptoms</p>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">AI Symptom Checker</h1>
+            <p className="text-gray-600 dark:text-gray-300">Get preliminary health insights by describing your symptoms</p>
           </div>
         </div>
       </motion.div>
@@ -75,9 +75,9 @@ const SymptomChecker: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
+          className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 transition-colors duration-200"
         >
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Select Your Symptoms</h2>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">Select Your Symptoms</h2>
           
           <div className="space-y-4">
             <div className="relative">
@@ -87,18 +87,18 @@ const SymptomChecker: React.FC = () => {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search for symptoms..."
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               />
             </div>
 
             {/* Search Results */}
             {searchTerm && (
-              <div className="max-h-40 overflow-y-auto border border-gray-200 rounded-lg">
+              <div className="max-h-40 overflow-y-auto border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700">
                 {filteredSymptoms.map((symptom) => (
                   <button
                     key={symptom.id}
                     onClick={() => addSymptom(symptom.id)}
-                    className="w-full text-left p-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
+                    className="w-full text-left p-3 hover:bg-gray-50 dark:hover:bg-gray-600 border-b border-gray-100 dark:border-gray-600 last:border-b-0"
                   >
                     <div className="flex items-center justify-between">
                       <span className="font-medium text-gray-900">{symptom.name}</span>
@@ -106,20 +106,20 @@ const SymptomChecker: React.FC = () => {
                         {symptom.severity}
                       </span>
                     </div>
-                    <p className="text-sm text-gray-600 mt-1">{symptom.category}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">{symptom.category}</p>
                   </button>
                 ))}
                 {filteredSymptoms.length === 0 && (
-                  <p className="p-3 text-gray-500 text-center">No symptoms found</p>
+                  <p className="p-3 text-gray-500 dark:text-gray-400 text-center">No symptoms found</p>
                 )}
               </div>
             )}
 
             {/* Selected Symptoms */}
             <div>
-              <h3 className="font-medium text-gray-900 mb-2">Selected Symptoms:</h3>
+              <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-2">Selected Symptoms:</h3>
               {selectedSymptoms.length === 0 ? (
-                <p className="text-gray-500 text-sm">No symptoms selected</p>
+                <p className="text-gray-500 dark:text-gray-400 text-sm">No symptoms selected</p>
               ) : (
                 <div className="space-y-2">
                   {selectedSymptoms.map((symptomId) => {
@@ -129,10 +129,10 @@ const SymptomChecker: React.FC = () => {
                     return (
                       <div
                         key={symptomId}
-                        className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                        className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
                       >
                         <div>
-                          <span className="font-medium text-gray-900">{symptom.name}</span>
+                          <span className="font-medium text-gray-900 dark:text-gray-100">{symptom.name}</span>
                           <span className={`ml-2 px-2 py-1 rounded-full text-xs ${getSeverityColor(symptom.severity)}`}>
                             {symptom.severity}
                           </span>
@@ -166,14 +166,14 @@ const SymptomChecker: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
+          className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 transition-colors duration-200"
         >
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Analysis Results</h2>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">Analysis Results</h2>
           
           {!hasAnalyzed ? (
             <div className="text-center py-12">
               <Stethoscope className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-500">Select symptoms and click "Analyze Symptoms" to see results</p>
+              <p className="text-gray-500 dark:text-gray-400">Select symptoms and click "Analyze Symptoms" to see results</p>
             </div>
           ) : (
             <div className="space-y-6">
@@ -221,10 +221,10 @@ const SymptomChecker: React.FC = () => {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1 }}
-                    className="border border-gray-200 rounded-lg p-4"
+                    className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-white dark:bg-gray-800"
                   >
                     <div className="flex items-center justify-between mb-3">
-                      <h3 className="font-medium text-gray-900">{symptom.name}</h3>
+                      <h3 className="font-medium text-gray-900 dark:text-gray-100">{symptom.name}</h3>
                       <span className={`px-2 py-1 rounded-full text-xs ${getSeverityColor(symptom.severity)}`}>
                         {symptom.severity}
                       </span>
@@ -232,8 +232,8 @@ const SymptomChecker: React.FC = () => {
                     
                     <div className="space-y-3">
                       <div>
-                        <h4 className="text-sm font-medium text-gray-700 mb-1">Common Causes:</h4>
-                        <ul className="text-sm text-gray-600 space-y-1">
+                        <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Common Causes:</h4>
+                        <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1">
                           {symptom.commonCauses.map((cause, i) => (
                             <li key={i} className="flex items-center">
                               <span className="w-1.5 h-1.5 bg-gray-400 rounded-full mr-2"></span>
@@ -244,8 +244,8 @@ const SymptomChecker: React.FC = () => {
                       </div>
                       
                       <div>
-                        <h4 className="text-sm font-medium text-gray-700 mb-1">Recommendations:</h4>
-                        <ul className="text-sm text-gray-600 space-y-1">
+                        <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Recommendations:</h4>
+                        <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1">
                           {symptom.recommendations.map((rec, i) => (
                             <li key={i} className="flex items-center">
                               <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-2"></span>

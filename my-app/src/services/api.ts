@@ -67,6 +67,29 @@ export const authAPI = {
   getProfile: async (): Promise<User> => {
     return apiRequest('/api/auth/profile');
   },
+
+  updateProfile: async (profileData: {
+    name?: string;
+    age?: number;
+    bloodGroup?: string;
+    gender?: string;
+    phone?: string;
+  }): Promise<User> => {
+    return apiRequest('/api/auth/profile', {
+      method: 'PUT',
+      body: JSON.stringify(profileData),
+    });
+  },
+
+  changePassword: async (passwordData: {
+    oldPassword: string;
+    newPassword: string;
+  }): Promise<{ message: string }> => {
+    return apiRequest('/api/auth/change-password', {
+      method: 'PUT',
+      body: JSON.stringify(passwordData),
+    });
+  },
 };
 
 // Reminders API

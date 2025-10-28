@@ -4,7 +4,6 @@ import { Bell, X, Check, Droplets, Clock, AlertCircle, Settings, Trash2 } from '
 import { notificationService, Notification } from '../services/notificationService';
 import { Skeleton } from './ui/skeleton';
 import { useNavigate } from 'react-router-dom';
-import toast from 'react-hot-toast';
 
 interface NotificationDropdownProps {
   isOpen: boolean;
@@ -28,7 +27,7 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = React.memo(({ 
       const data = await notificationService.getNotifications();
       setNotifications(data);
     } catch (error) {
-      toast.error('Failed to load notifications');
+      console.error('Failed to load notifications:', error);
     } finally {
       setLoading(false);
     }
@@ -43,7 +42,7 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = React.memo(({ 
         )
       );
     } catch (error) {
-      toast.error('Failed to mark as read');
+      console.error('Failed to mark as read:', error);
     }
   }, []);
 
@@ -53,9 +52,8 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = React.memo(({ 
       setNotifications(prev => 
         prev.map(notif => ({ ...notif, isRead: true }))
       );
-      toast.success('All notifications marked as read');
     } catch (error) {
-      toast.error('Failed to mark all as read');
+      console.error('Failed to mark all as read:', error);
     }
   }, []);
 
@@ -63,9 +61,8 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = React.memo(({ 
     try {
       await notificationService.clearAllNotifications();
       setNotifications([]);
-      toast.success('All notifications cleared');
     } catch (error) {
-      toast.error('Failed to clear notifications');
+      console.error('Failed to clear notifications:', error);
     }
   }, []);
 

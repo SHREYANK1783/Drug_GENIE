@@ -107,4 +107,66 @@ const getUserProfile = expressAsyncHandler(async (req: AuthRequest, res: Respons
   }
 });
 
-export { registerUser, loginUser, getUserProfile };
+// Update user profile
+const updateUserProfile = expressAsyncHandler(async (req: AuthRequest, res: Response) => {
+  const user = req.user;
+
+  if (!user) {
+    res.status(404);
+    throw new Error('User not found');
+  }
+
+  const { name, age, bloodGroup, gender, phone } = req.body;
+
+  // Update user fields
+  if (name) user.name = name;
+  if (age) user.age = age;
+  if (bloodGroup) user.bloodGroup = bloodGroup;
+  if (gender) user.gender = gender;
+  if (phone !== undefined) user.phone = phone;
+
+  const updatedUser = await user.save();
+
+  res.json({
+    id: updatedUser._id,
+    name: updatedUser.name,
+    email: updatedUser.email,
+    age: updatedUser.age,
+    bloodGroup: updatedUser.bloodGroup,
+    gender: updatedUser.gender,
+    phone: updatedUser.phone,
+    createdAt: updatedUser.createdAt,
+  });
+});
+
+// Change user password
+const changeUserPassword = expressAsyncHandler(async (req: AuthRequest, res: Response) => {
+  const user = req.user;
+
+  if (!user) {
+    res.status(404);
+    throw new Error('User not found');
+  }
+
+  const { oldPassword, newPassword } = req.body;
+
+  // Validate new password
+  if (!newPassword || newPassword.length < 6) {
+    res.status(400);
+    throw new Error('New password must be at least 6 characters long');
+  }
+
+  // Check if old password matches
+  if (!(await user.matchPassword(oldPassword))) {
+    res.status(401);
+    throw new Error('Current password is incorrect');
+  }
+
+  // Update password
+  user.password = newPassword;
+  await user.save();
+
+  res.json({ message: 'Password changed successfully' });
+});
+
+export { registerUser, loginUser, getUserProfile, updateUserProfile, changeUserPassword };

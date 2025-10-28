@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import { Shield, Plus, X, AlertTriangle, CheckCircle, AlertCircle, Loader2, Search } from 'lucide-react';
 import { checkDrugInteractions, getSeverityColor, DrugInteraction, getMedicineSuggestions } from '../utils/drugInteractions';
 import { Skeleton } from '../components/ui/skeleton';
-import toast from 'react-hot-toast';
 
 const DrugChecker: React.FC = () => {
   const [medications, setMedications] = useState<string[]>([]);
@@ -56,19 +55,16 @@ const DrugChecker: React.FC = () => {
     const trimmedMed = currentMed.trim();
     
     if (!trimmedMed) {
-      toast.error('Please enter a medicine name');
       return;
     }
     
     if (medications.includes(trimmedMed)) {
-      toast.error('This medication is already in the list');
       return;
     }
     
     // Allow any reasonable input - validation will happen during interaction checking
     // This ensures we don't block potentially valid drug names
     if (trimmedMed.length < 2) {
-      toast.error('Medicine name must be at least 2 characters long');
       return;
     }
     
@@ -78,7 +74,6 @@ const DrugChecker: React.FC = () => {
     setHasChecked(false);
     setShowSuggestions(false);
     setSuggestions([]);
-    toast.success(`${trimmedMed} added successfully`);
   };
 
   const removeMedication = (index: number) => {
@@ -88,7 +83,6 @@ const DrugChecker: React.FC = () => {
 
   const checkInteractions = async () => {
     if (medications.length < 2) {
-      toast.error('Please add at least 2 medications to check for interactions');
       return;
     }
 
@@ -98,16 +92,24 @@ const DrugChecker: React.FC = () => {
       setInteractions(foundInteractions);
       setHasChecked(true);
 
-      if (foundInteractions.length === 0) {
-        toast.success('No known interactions found between these medications');
-      } else {
-        toast(`Found ${foundInteractions.length} potential interaction(s)`, {
-          icon: '⚠️',
+      // Log the interaction check to backend
+      try {
+        await fetch('http://localhost:5000/api/stats/log-interaction', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            medications: medications,
+            interactionsFound: foundInteractions.length,
+          }),
         });
+      } catch (logError) {
+        console.error('Error logging interaction:', logError);
+        // Don't block the user if logging fails
       }
     } catch (error) {
       console.error('Error checking interactions:', error);
-      toast.error('Failed to check interactions. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -126,15 +128,15 @@ const DrugChecker: React.FC = () => {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
+        className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 transition-colors duration-200"
       >
         <div className="flex items-center space-x-3">
-          <div className="p-3 bg-green-100 rounded-full">
+          <div className="p-3 bg-green-100 dark:bg-green-900 rounded-full">
             <Shield className="h-6 w-6 text-green-600" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Drug Interaction Checker</h1>
-            <p className="text-gray-600">Check for potentially dangerous interactions between medications</p>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Drug Interaction Checker</h1>
+            <p className="text-gray-600 dark:text-gray-300">Check for potentially dangerous interactions between medications</p>
           </div>
         </div>
       </motion.div>
@@ -144,9 +146,9 @@ const DrugChecker: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
+          className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 transition-colors duration-200"
         >
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Add Medications</h2>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">Add Medications</h2>
           
           <div className="space-y-4">
             <div className="relative">
@@ -159,7 +161,7 @@ const DrugChecker: React.FC = () => {
                     onChange={handleInputChange}
                     onKeyPress={handleKeyPress}
                     placeholder="Start typing medicine name (e.g., Asp... for Aspirin)"
-                    className="w-full px-4 py-3 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="w-full px-4 py-3 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   />
                   <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                 </div>
@@ -179,17 +181,17 @@ const DrugChecker: React.FC = () => {
                   ref={suggestionsRef}
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+                  className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg max-h-40 overflow-y-auto"
                 >
                   {suggestions.map((suggestion, index) => (
                     <motion.div
                       key={index}
                       whileHover={{ backgroundColor: '#f3f4f6' }}
                       onClick={() => selectSuggestion(suggestion)}
-                      className="px-4 py-3 cursor-pointer hover:bg-gray-50 border-b border-gray-100 last:border-b-0 flex items-center space-x-2"
+                      className="px-4 py-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-600 border-b border-gray-100 dark:border-gray-600 last:border-b-0 flex items-center space-x-2"
                     >
                       <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span className="text-gray-900 font-medium">{suggestion}</span>
+                      <span className="text-gray-900 dark:text-gray-100 font-medium">{suggestion}</span>
                     </motion.div>
                   ))}
                 </motion.div>
@@ -203,9 +205,9 @@ const DrugChecker: React.FC = () => {
                   key={index}
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
-                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                  className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
                 >
-                  <span className="font-medium text-gray-900">{med}</span>
+                  <span className="font-medium text-gray-900 dark:text-gray-100">{med}</span>
                   <button
                     onClick={() => removeMedication(index)}
                     className="text-red-500 hover:text-red-700 transition-colors"
@@ -239,15 +241,15 @@ const DrugChecker: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
+          className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 transition-colors duration-200"
         >
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Interaction Results</h2>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">Interaction Results</h2>
           
           {isLoading ? (
             <div className="p-6 space-y-4">
               {/* Interaction Cards Skeleton */}
               {[1, 2, 3].map((i) => (
-                <div key={i} className="border border-gray-200 rounded-lg p-4 space-y-3">
+                <div key={i} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-3">
                   <div className="flex items-center space-x-3">
                     <Skeleton className="h-5 w-5 rounded" />
                     <div className="space-y-2">
@@ -255,7 +257,7 @@ const DrugChecker: React.FC = () => {
                       <Skeleton className="h-4 w-[80px]" />
                     </div>
                   </div>
-                  <div className="bg-gray-50 p-3 rounded-lg">
+                  <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
                     <Skeleton className="h-4 w-full mb-2" />
                     <Skeleton className="h-4 w-[70%]" />
                   </div>
@@ -270,8 +272,8 @@ const DrugChecker: React.FC = () => {
             </div>
           ) : !hasChecked ? (
             <div className="text-center py-12">
-              <Shield className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-500">Add medications and click "Check for Interactions" to see results</p>
+              <Shield className="h-16 w-16 text-gray-300 dark:text-gray-500 mx-auto mb-4" />
+              <p className="text-gray-500 dark:text-gray-400">Add medications and click "Check for Interactions" to see results</p>
             </div>
           ) : interactions.length === 0 ? (
             <motion.div
@@ -279,9 +281,9 @@ const DrugChecker: React.FC = () => {
               animate={{ opacity: 1, scale: 1 }}
               className="text-center py-12"
             >
-              <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No Interactions Found</h3>
-              <p className="text-gray-600">These medications appear to be safe to take together based on our database.</p>
+              <CheckCircle className="h-16 w-16 text-green-500 dark:text-green-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">No Interactions Found</h3>
+              <p className="text-gray-600 dark:text-gray-400">These medications appear to be safe to take together based on our database.</p>
             </motion.div>
           ) : (
             <div className="space-y-4">
@@ -291,7 +293,7 @@ const DrugChecker: React.FC = () => {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
-                  className="border border-gray-200 rounded-lg p-4"
+                  className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-white dark:bg-gray-800"
                 >
                   <div className="flex items-start space-x-3">
                     <AlertTriangle className={`h-5 w-5 mt-0.5 ${
@@ -300,7 +302,7 @@ const DrugChecker: React.FC = () => {
                     }`} />
                     <div className="flex-1">
                       <div className="flex items-center space-x-2 mb-2">
-                        <h3 className="font-medium text-gray-900">
+                        <h3 className="font-medium text-gray-900 dark:text-gray-100">
                           {interaction.drug1} + {interaction.drug2}
                         </h3>
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${getSeverityColor(interaction.severity)}`}>
@@ -309,8 +311,8 @@ const DrugChecker: React.FC = () => {
                       </div>
                       {/* Simple Summary */}
                       {interaction.simpleSummary && (
-                        <div className="bg-gray-50 p-3 rounded-lg mb-3">
-                          <p className="text-lg font-medium text-gray-900">
+                        <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg mb-3">
+                          <p className="text-lg font-medium text-gray-900 dark:text-gray-100">
                             💡 {interaction.simpleSummary}
                           </p>
                         </div>

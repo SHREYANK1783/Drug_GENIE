@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { Heart, Eye, EyeOff, Mail, Lock, User, Calendar, Droplets, ArrowRight, CheckCircle, Check, X } from 'lucide-react';
 import { registerUser } from '../../utils/storage';
-import toast from 'react-hot-toast';
 
 const bloodGroups = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 
@@ -107,14 +106,9 @@ const SignupPage: React.FC = () => {
       
       if (newUser) {
         clearSavedData(); // Clear saved form data on successful registration
-        toast.success(`Welcome to MediAI, ${newUser.name}!`);
         navigate('/');
-      } else {
-        toast.error('Registration failed. Please try again.');
       }
     } catch (error: any) {
-      const errorMessage = error?.message || 'Registration failed. Please check your details and try again.';
-      toast.error(errorMessage);
       console.error('Registration error:', error);
     } finally {
       setIsLoading(false);
