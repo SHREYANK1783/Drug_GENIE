@@ -14,6 +14,7 @@ import {
 
 interface SidebarProps {
   isSidebarOpen: boolean;
+  onClose?: () => void;
 }
 
 const navigationItems = [
@@ -26,16 +27,32 @@ const navigationItems = [
   { name: 'Symptom Checker', href: '/symptom-checker', icon: Stethoscope, color: 'text-cyan-600', bgColor: 'bg-cyan-50' },
 ];
 
-const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen }) => {
+const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, onClose }) => {
   const location = useLocation();
 
   return (
-    <motion.aside
-      initial={{ x: -300, opacity: 0 }}
-      animate={{ x: isSidebarOpen ? 0 : -300, opacity: isSidebarOpen ? 1 : 0 }}
-      transition={{ duration: 0.3 }}
-      className="fixed left-0 top-20 h-[calc(100vh-5rem)] w-72 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm shadow-xl border-r border-gray-200 dark:border-gray-700 pt-6 overflow-y-auto z-40 transition-colors duration-200"
-    >
+    <>
+      {/* Backdrop for mobile */}
+      {isSidebarOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+          className="fixed inset-0 bg-black/50 z-30 lg:hidden"
+          onClick={onClose}
+        />
+      )}
+      
+      <motion.aside
+        initial={{ x: -300, opacity: 0 }}
+        animate={{ 
+          x: isSidebarOpen ? 0 : -300, 
+          opacity: isSidebarOpen ? 1 : 0 
+        }}
+        transition={{ duration: 0.3, ease: "easeInOut" }}
+        className="fixed left-0 top-16 sm:top-20 h-[calc(100vh-4rem)] sm:h-[calc(100vh-5rem)] w-72 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm shadow-xl border-r border-gray-200 dark:border-gray-700 pt-6 overflow-y-auto z-40 transition-colors duration-200"
+      >
       <nav className="px-4">
         {/* Menu */}
         <div className="mb-8">
@@ -54,6 +71,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen }) => {
                 >
                   <Link
                     to={item.href}
+                    onClick={() => {
+                      // Auto-close sidebar on mobile when clicking a link
+                      if (window.innerWidth < 1024 && onClose) {
+                        onClose();
+                      }
+                    }}
                     className={`group flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
                       isActive
                         ? `${item.bgColor} dark:bg-gray-700 text-cyan-600 shadow-md border-l-4 border-cyan-600`
@@ -137,6 +160,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen }) => {
         </div>
       </nav>
     </motion.aside>
+    </>
   );
 };
 

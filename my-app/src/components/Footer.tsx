@@ -6,12 +6,12 @@ const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-gray-900 text-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+    <footer className="bg-gray-900 text-white w-full">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10">
           {/* Company Info */}
-          <div className="space-y-4">
-            <div className="flex items-center space-x-2">
+          <div className="space-y-4 text-center sm:text-left">
+            <div className="flex items-center justify-center sm:justify-start space-x-2">
               <div className="bg-blue-600 p-2 rounded-lg">
                 <Heart className="w-6 h-6 text-white" />
               </div>
@@ -21,7 +21,7 @@ const Footer: React.FC = () => {
               Your trusted healthcare companion providing medication management, 
               drug interaction checking, and blood donation services.
             </p>
-            <div className="flex space-x-4">
+            <div className="flex justify-center sm:justify-start space-x-4">
               <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors" aria-label="Follow us on Twitter">
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/>
@@ -41,7 +41,7 @@ const Footer: React.FC = () => {
           </div>
 
           {/* Quick Links */}
-          <div className="space-y-4">
+          <div className="space-y-4 text-center sm:text-left">
             <h3 className="text-lg font-semibold">Quick Links</h3>
             <ul className="space-y-2">
               <li>
@@ -73,13 +73,13 @@ const Footer: React.FC = () => {
           </div>
 
           {/* Legal */}
-          <div className="space-y-4">
+          <div className="space-y-4 text-center sm:text-left">
             <h3 className="text-lg font-semibold">Legal</h3>
             <ul className="space-y-2">
               <li>
                 <Link 
                   to="/privacy-policy" 
-                  className="text-gray-300 hover:text-white transition-colors text-sm flex items-center"
+                  className="text-gray-300 hover:text-white transition-colors text-sm flex items-center justify-center sm:justify-start"
                 >
                   <Shield className="w-4 h-4 mr-2" />
                   Privacy Policy
@@ -88,7 +88,7 @@ const Footer: React.FC = () => {
               <li>
                 <Link 
                   to="/terms-of-service" 
-                  className="text-gray-300 hover:text-white transition-colors text-sm flex items-center"
+                  className="text-gray-300 hover:text-white transition-colors text-sm flex items-center justify-center sm:justify-start"
                 >
                   <FileText className="w-4 h-4 mr-2" />
                   Terms of Service
@@ -108,19 +108,19 @@ const Footer: React.FC = () => {
           </div>
 
           {/* Contact */}
-          <div className="space-y-4">
+          <div className="space-y-4 text-center sm:text-left">
             <h3 className="text-lg font-semibold">Contact Us</h3>
             <ul className="space-y-3">
-              <li className="flex items-center text-gray-300 text-sm">
-                <Mail className="w-4 h-4 mr-3 text-blue-400" />
-                support@drugenie.com
+              <li className="flex items-center justify-center sm:justify-start text-gray-300 text-sm">
+                <Mail className="w-4 h-4 mr-3 text-blue-400 flex-shrink-0" />
+                <span>support@drugenie.com</span>
               </li>
-              <li className="flex items-center text-gray-300 text-sm">
-                <Phone className="w-4 h-4 mr-3 text-blue-400" />
-                +1 (555) 123-4567
+              <li className="flex items-center justify-center sm:justify-start text-gray-300 text-sm">
+                <Phone className="w-4 h-4 mr-3 text-blue-400 flex-shrink-0" />
+                <span>+1 (555) 123-4567</span>
               </li>
-              <li className="flex items-start text-gray-300 text-sm">
-                <MapPin className="w-4 h-4 mr-3 mt-0.5 text-blue-400" />
+              <li className="flex items-start justify-center sm:justify-start text-gray-300 text-sm">
+                <MapPin className="w-4 h-4 mr-3 mt-0.5 text-blue-400 flex-shrink-0" />
                 <span>
                   123 Healthcare Ave<br />
                   Medical District<br />
@@ -132,24 +132,24 @@ const Footer: React.FC = () => {
         </div>
 
         {/* Bottom Bar */}
-        <div className="border-t border-gray-800 mt-12 pt-8">
-          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-            <div className="text-gray-400 text-sm">
+        <div className="border-t border-gray-800 mt-8 sm:mt-12 pt-6 sm:pt-8">
+          <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
+            <div className="text-gray-400 text-sm text-center sm:text-left">
               © {currentYear} Drug GENIE. All rights reserved.
             </div>
-            <div className="flex items-center space-x-6 text-sm text-gray-400">
-              <span>Made with ❤️ for better healthcare</span>
+            <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 text-sm text-gray-400">
+              <span className="text-center">Made with ❤️ for better healthcare</span>
               <div className="flex items-center space-x-2">
                 <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                <span>System Status: Operational</span>
+                <span className="whitespace-nowrap">System Status: Operational</span>
               </div>
             </div>
           </div>
         </div>
 
         {/* Medical Disclaimer */}
-        <div className="mt-8 p-4 bg-gray-800 rounded-lg">
-          <p className="text-gray-400 text-xs leading-relaxed">
+        <div className="mt-6 sm:mt-8 p-3 sm:p-4 bg-gray-800 rounded-lg">
+          <p className="text-gray-400 text-xs sm:text-sm leading-relaxed text-center sm:text-left">
             <strong className="text-yellow-400">Medical Disclaimer:</strong> Drug GENIE is not a substitute for professional medical advice, 
             diagnosis, or treatment. Always seek the advice of your physician or other qualified health provider with any questions 
             you may have regarding a medical condition. Never disregard professional medical advice or delay in seeking it because 
