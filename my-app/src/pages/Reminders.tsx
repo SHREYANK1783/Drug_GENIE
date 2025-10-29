@@ -146,6 +146,116 @@ const Reminders: React.FC = () => {
   }
 
   return (
+    <div className="min-h-[60vh] flex items-center justify-center">
+      {/* Coming Soon Banner */}
+      <motion.div
+        initial={{ opacity: 0, y: 50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        className="text-center max-w-2xl mx-auto px-4"
+      >
+        {/* Animated Icon */}
+        <motion.div
+          initial={{ scale: 0, rotate: -180 }}
+          animate={{ scale: 1, rotate: 0 }}
+          transition={{ delay: 0.2, type: 'spring', stiffness: 200, damping: 15 }}
+          className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-900 dark:to-orange-800 rounded-full mb-6 shadow-lg"
+        >
+          <motion.div
+            animate={{ 
+              rotate: [0, -10, 10, -10, 0],
+              scale: [1, 1.1, 1, 1.1, 1]
+            }}
+            transition={{ 
+              duration: 2,
+              repeat: Infinity,
+              repeatDelay: 1
+            }}
+          >
+            <Clock className="h-12 w-12 text-orange-600 dark:text-orange-400" />
+          </motion.div>
+        </motion.div>
+        
+        {/* Title with stagger animation */}
+        <motion.h1 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.5 }}
+          className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4"
+        >
+          Medicine Reminders
+        </motion.h1>
+        
+        <motion.p 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5, duration: 0.5 }}
+          className="text-gray-600 dark:text-gray-300 text-lg mb-8"
+        >
+          Set up smart reminders for your medications
+        </motion.p>
+        
+        {/* Animated Badge */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.6, duration: 0.5 }}
+          whileHover={{ scale: 1.05 }}
+          className="inline-block"
+        >
+          <motion.div
+            animate={{ 
+              boxShadow: [
+                "0 0 0 0 rgba(251, 146, 60, 0)",
+                "0 0 0 10px rgba(251, 146, 60, 0.1)",
+                "0 0 0 20px rgba(251, 146, 60, 0)"
+              ]
+            }}
+            transition={{ 
+              duration: 2,
+              repeat: Infinity,
+              repeatDelay: 0.5
+            }}
+            className="bg-gradient-to-r from-orange-400 via-orange-500 to-red-500 rounded-full px-8 py-3 text-white font-semibold shadow-lg"
+          >
+            <motion.span
+              animate={{ opacity: [1, 0.7, 1] }}
+              transition={{ duration: 1.5, repeat: Infinity }}
+            >
+              🚧 Coming Soon - Under Development
+            </motion.span>
+          </motion.div>
+        </motion.div>
+
+        {/* Floating particles effect */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {[...Array(6)].map((_, i) => (
+            <motion.div
+              key={i}
+              className="absolute w-2 h-2 bg-orange-400 rounded-full opacity-20"
+              initial={{ 
+                x: Math.random() * window.innerWidth,
+                y: window.innerHeight + 20
+              }}
+              animate={{
+                y: -20,
+                x: Math.random() * window.innerWidth
+              }}
+              transition={{
+                duration: 3 + Math.random() * 2,
+                repeat: Infinity,
+                delay: i * 0.5,
+                ease: "linear"
+              }}
+            />
+          ))}
+        </div>
+      </motion.div>
+    </div>
+  );
+
+  // Hidden functionality - will be enabled later
+  return (
     <div className="space-y-6">
       {/* Header */}
       <motion.div
