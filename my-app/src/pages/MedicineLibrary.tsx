@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import { Search, BookOpen, AlertTriangle, Info, ExternalLink, Loader2, Pill } from 'lucide-react';
 import { searchMedicines, getMedicineByName, MedicineSearchResult, MedicineData } from '../services/medicineApi';
 import { Skeleton } from '../components/ui/skeleton';
-import toast from 'react-hot-toast';
 
 const MedicineLibrary: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -21,7 +20,7 @@ const MedicineLibrary: React.FC = () => {
           const results = await searchMedicines(searchTerm);
           setSearchResults(results);
         } catch (error) {
-          toast.error('Failed to search medicines');
+          console.error('Failed to search medicines:', error);
           setSearchResults([]);
         } finally {
           setIsSearching(false);
@@ -41,7 +40,7 @@ const MedicineLibrary: React.FC = () => {
       const details = await getMedicineByName(medicine.NAME);
       setSelectedMedicine(details);
     } catch (error) {
-      toast.error('Failed to load medicine details');
+      console.error('Failed to load medicine details:', error);
     } finally {
       setIsLoadingDetails(false);
     }
@@ -59,15 +58,15 @@ const MedicineLibrary: React.FC = () => {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
+        className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 transition-colors duration-200"
       >
         <div className="flex items-center space-x-3">
-          <div className="p-3 bg-blue-100 rounded-full">
+          <div className="p-3 bg-blue-100 dark:bg-blue-900 rounded-full">
             <BookOpen className="h-6 w-6 text-blue-600" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Medicine Information Library</h1>
-            <p className="text-gray-600">Browse comprehensive information about medicines, dosages, and side effects</p>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Medicine Information Library</h1>
+            <p className="text-gray-600 dark:text-gray-300">Browse comprehensive information about medicines, dosages, and side effects</p>
           </div>
         </div>
       </motion.div>
@@ -76,7 +75,7 @@ const MedicineLibrary: React.FC = () => {
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
+        className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 transition-colors duration-200"
       >
         <div className="relative">
           <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
@@ -86,11 +85,11 @@ const MedicineLibrary: React.FC = () => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search from 14,690+ medicines by name..."
-            className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full pl-10 pr-12 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
           />
         </div>
         {searchTerm && (
-          <p className="mt-2 text-sm text-gray-600">
+          <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
             {isSearching ? 'Searching...' : `Found ${searchResults.length} results`}
           </p>
         )}
@@ -101,10 +100,10 @@ const MedicineLibrary: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="bg-white rounded-lg shadow-sm border border-gray-200"
+          className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 transition-colors duration-200"
         >
-          <div className="p-6 border-b border-gray-200">
-            <h2 className="text-xl font-semibold text-gray-900">
+          <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
               Search Results ({searchResults.length})
             </h2>
           </div>
@@ -117,7 +116,7 @@ const MedicineLibrary: React.FC = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
                   onClick={() => handleMedicineSelect(medicine)}
-                  className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors ${
+                  className={`p-4 border-b border-gray-100 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
                     selectedMedicine?.name === medicine.NAME ? 'bg-blue-50 border-blue-200' : ''
                   }`}
                 >
@@ -126,8 +125,8 @@ const MedicineLibrary: React.FC = () => {
                       <Pill className="h-4 w-4 text-blue-600" />
                     </div>
                     <div className="flex-1">
-                      <h3 className="font-medium text-gray-900">{medicine.NAME}</h3>
-                      <p className="text-sm text-gray-600 line-clamp-2">
+                      <h3 className="font-medium text-gray-900 dark:text-gray-100">{medicine.NAME}</h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2">
                         {medicine.INTRODUCTION?.substring(0, 100)}...
                       </p>
                     </div>
@@ -136,12 +135,12 @@ const MedicineLibrary: React.FC = () => {
               ))
             ) : searchTerm ? (
               <div className="p-6 text-center">
-                <p className="text-gray-500">No medicines found for "{searchTerm}"</p>
+                <p className="text-gray-500 dark:text-gray-400">No medicines found for "{searchTerm}"</p>
               </div>
             ) : (
               <div className="p-6 text-center">
                 <Search className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-                <p className="text-gray-500">Search for medicines to see results</p>
+                <p className="text-gray-500 dark:text-gray-400">Search for medicines to see results</p>
               </div>
             )}
           </div>
@@ -151,7 +150,7 @@ const MedicineLibrary: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="bg-white rounded-lg shadow-sm border border-gray-200"
+          className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 transition-colors duration-200"
         >
           {isLoadingDetails ? (
             <div className="p-6 space-y-6">

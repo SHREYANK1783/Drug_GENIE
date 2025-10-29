@@ -6,7 +6,6 @@ import { getUserReminders, saveReminder, deleteReminder, getCurrentUser } from '
 import { Skeleton } from '../components/ui/skeleton';
 import { v4 as uuidv4 } from 'uuid';
 import { format } from 'date-fns';
-import toast from 'react-hot-toast';
 
 const Reminders: React.FC = () => {
   const [reminders, setReminders] = useState<Reminder[]>([]);
@@ -33,7 +32,7 @@ const Reminders: React.FC = () => {
           const userReminders = await getUserReminders(currentUser.id);
           setReminders(userReminders);
         } catch (error) {
-          toast.error('Failed to load reminders');
+          console.error('Failed to load reminders:', error);
         } finally {
           setIsLoading(false);
         }
@@ -70,11 +69,7 @@ const Reminders: React.FC = () => {
       setShowForm(false);
       setEditingReminder(null);
       resetForm();
-      
-      toast.success(editingReminder ? 'Reminder updated successfully' : 'Reminder created successfully');
     } catch (error: any) {
-      const errorMessage = error?.message || 'Failed to save reminder. Please try again.';
-      toast.error(errorMessage);
       console.error('Save reminder error:', error);
     }
   };
@@ -99,10 +94,7 @@ const Reminders: React.FC = () => {
         await deleteReminder(id);
         const updatedReminders = await getUserReminders(currentUser!.id);
         setReminders(updatedReminders);
-        toast.success('Reminder deleted successfully');
       } catch (error: any) {
-        const errorMessage = error?.message || 'Failed to delete reminder. Please try again.';
-        toast.error(errorMessage);
         console.error('Delete reminder error:', error);
       }
     }
@@ -159,16 +151,16 @@ const Reminders: React.FC = () => {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
+        className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 transition-colors duration-200"
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="p-3 bg-orange-100 rounded-full">
+            <div className="p-3 bg-orange-100 dark:bg-orange-900 rounded-full">
               <Clock className="h-6 w-6 text-orange-600" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Medicine Reminders</h1>
-              <p className="text-gray-600">Set up smart reminders for your medications</p>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Medicine Reminders</h1>
+              <p className="text-gray-600 dark:text-gray-300">Set up smart reminders for your medications</p>
             </div>
           </div>
           <motion.button
@@ -188,16 +180,16 @@ const Reminders: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
+          className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 transition-colors duration-200"
         >
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
             {editingReminder ? 'Edit Reminder' : 'Create New Reminder'}
           </h2>
           
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Medicine Name
                 </label>
                 <input
@@ -205,13 +197,13 @@ const Reminders: React.FC = () => {
                   required
                   value={formData.medicineName}
                   onChange={(e) => setFormData({ ...formData, medicineName: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   placeholder="e.g., Aspirin"
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Dosage
                 </label>
                 <input
@@ -219,7 +211,7 @@ const Reminders: React.FC = () => {
                   required
                   value={formData.dosage}
                   onChange={(e) => setFormData({ ...formData, dosage: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   placeholder="e.g., 100mg"
                 />
               </div>
@@ -278,7 +270,7 @@ const Reminders: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Start Date
                 </label>
                 <input
@@ -286,12 +278,12 @@ const Reminders: React.FC = () => {
                   required
                   value={formData.startDate}
                   onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   End Date
                 </label>
                 <input
@@ -299,7 +291,7 @@ const Reminders: React.FC = () => {
                   required
                   value={formData.endDate}
                   onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                 />
               </div>
             </div>
@@ -333,7 +325,7 @@ const Reminders: React.FC = () => {
                   setEditingReminder(null);
                   resetForm();
                 }}
-                className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+                className="px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
               >
                 Cancel
               </button>
@@ -346,14 +338,14 @@ const Reminders: React.FC = () => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-lg shadow-sm border border-gray-200"
+        className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 transition-colors duration-200"
       >
-        <div className="p-6 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900">Your Reminders ({reminders.length})</h2>
+        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Your Reminders ({reminders.length})</h2>
         </div>
         
         {isLoading ? (
-          <div className="divide-y divide-gray-200">
+          <div className="divide-y divide-gray-200 dark:divide-gray-700">
             {[1, 2, 3].map((i) => (
               <div key={i} className="p-6 space-y-4">
                 <div className="flex items-center justify-between">
@@ -380,9 +372,9 @@ const Reminders: React.FC = () => {
           </div>
         ) : reminders.length === 0 ? (
           <div className="p-12 text-center">
-            <Bell className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No Reminders Set</h3>
-            <p className="text-gray-600 mb-4">Create your first medicine reminder to stay on track</p>
+            <Bell className="h-16 w-16 text-gray-300 dark:text-gray-500 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">No Reminders Set</h3>
+            <p className="text-gray-600 dark:text-gray-300 mb-4">Create your first medicine reminder to stay on track</p>
             <button
               onClick={() => setShowForm(true)}
               className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
@@ -391,19 +383,19 @@ const Reminders: React.FC = () => {
             </button>
           </div>
         ) : (
-          <div className="divide-y divide-gray-200">
+          <div className="divide-y divide-gray-200 dark:divide-gray-700">
             {reminders.map((reminder, index) => (
               <motion.div
                 key={reminder.id}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.1 }}
-                className="p-6 hover:bg-gray-50 transition-colors"
+                className="p-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
                     <div className="flex items-center space-x-3 mb-2">
-                      <h3 className="text-lg font-medium text-gray-900">{reminder.medicineName}</h3>
+                      <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">{reminder.medicineName}</h3>
                       <span className="px-2 py-1 bg-orange-100 text-orange-800 text-sm rounded-full">
                         {reminder.dosage}
                       </span>
@@ -414,7 +406,7 @@ const Reminders: React.FC = () => {
                       </span>
                     </div>
                     
-                    <div className="flex items-center space-x-4 text-sm text-gray-600 mb-2">
+                    <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-300 mb-2">
                       <div className="flex items-center space-x-1">
                         <Clock className="h-4 w-4" />
                         <span>{reminder.frequency}</span>
@@ -432,7 +424,7 @@ const Reminders: React.FC = () => {
                     </div>
                     
                     {reminder.notes && (
-                      <p className="text-sm text-gray-600 italic">{reminder.notes}</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-300 italic">{reminder.notes}</p>
                     )}
                   </div>
                   

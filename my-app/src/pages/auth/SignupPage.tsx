@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
-import { Heart, Eye, EyeOff, Mail, Lock, User, Calendar, Droplets, ArrowRight, CheckCircle } from 'lucide-react';
+import { Heart, Eye, EyeOff, Mail, Lock, User, Calendar, Droplets, ArrowRight, CheckCircle, Check, X } from 'lucide-react';
 import { registerUser } from '../../utils/storage';
-import toast from 'react-hot-toast';
 
 const bloodGroups = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 
@@ -11,6 +10,7 @@ const SignupPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
   
   // Initialize with completely empty form - no persistence
   const [formData, setFormData] = useState({
@@ -31,7 +31,7 @@ const SignupPage: React.FC = () => {
     
     // If returning from legal pages, restore data
     if (returnToStep2 === 'true' || savedFormData) {
-      console.log('🔄 RESTORING DATA FROM LEGAL PAGE NAVIGATION');
+      console.log(' RESTORING DATA FROM LEGAL PAGE NAVIGATION');
       
       if (savedFormData) {
         try {
@@ -54,7 +54,7 @@ const SignupPage: React.FC = () => {
       }
     } else {
       // New user - clear everything and start fresh
-      console.log('🧹 NEW USER - STARTING FRESH');
+      console.log(' NEW USER - STARTING FRESH');
       sessionStorage.clear();
       localStorage.clear();
       
@@ -106,14 +106,9 @@ const SignupPage: React.FC = () => {
       
       if (newUser) {
         clearSavedData(); // Clear saved form data on successful registration
-        toast.success(`Welcome to MediAI, ${newUser.name}!`);
         navigate('/');
-      } else {
-        toast.error('Registration failed. Please try again.');
       }
     } catch (error: any) {
-      const errorMessage = error?.message || 'Registration failed. Please check your details and try again.';
-      toast.error(errorMessage);
       console.error('Registration error:', error);
     } finally {
       setIsLoading(false);
@@ -128,8 +123,23 @@ const SignupPage: React.FC = () => {
     if (currentStep > 1) setCurrentStep(currentStep - 1);
   };
 
+  // Password validation helpers
+  const validatePassword = (password: string) => {
+    const hasMinLength = password.length >= 6;
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+    return {
+      hasMinLength,
+      hasUpperCase,
+      hasSpecialChar,
+      isValid: hasMinLength && hasUpperCase && hasSpecialChar
+    };
+  };
+
+  const passwordValidation = validatePassword(formData.password);
+
   const isStep1Valid = formData.name && formData.age && formData.bloodGroup && formData.gender;
-  const isStep2Valid = formData.email && formData.password.length >= 6;
+  const isStep2Valid = formData.email && passwordValidation.isValid;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-white to-blue-50 flex">
@@ -146,7 +156,7 @@ const SignupPage: React.FC = () => {
               <div className="p-3 bg-white/20 backdrop-blur-sm rounded-2xl">
                 <Heart className="h-8 w-8 text-white" />
               </div>
-              <h1 className="text-3xl font-bold">MediAI</h1>
+              <h1 className="text-3xl font-bold">Drug GENIE</h1>
             </div>
             
             <h2 className="text-4xl font-bold mb-6 leading-tight">
@@ -200,7 +210,7 @@ const SignupPage: React.FC = () => {
               <div className="p-3 bg-cyan-500 rounded-2xl">
                 <Heart className="h-8 w-8 text-white" />
               </div>
-              <h1 className="text-2xl font-bold text-gray-900">MediAI</h1>
+              <h1 className="text-2xl font-bold text-gray-900">Drug GENIE</h1>
             </div>
           </div>
 
@@ -364,16 +374,17 @@ const SignupPage: React.FC = () => {
                     <div className="relative">
                       <Lock className="absolute left-4 top-4 h-5 w-5 text-gray-400" />
                       <input
-                        type="password"
+                        type={showPassword ? "text" : "password"}
                         value={formData.password}
                         onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                        onFocus={() => setPasswordFocused(true)}
+                        onBlur={() => setPasswordFocused(false)}
                         className="w-full pl-12 pr-12 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-200"
                         placeholder="Create a strong password"
                         autoComplete="new-password"
                         autoCorrect="off"
                         autoCapitalize="off"
                         spellCheck="false"
-                        minLength={6}
                         required
                       />
                       <button
@@ -384,7 +395,51 @@ const SignupPage: React.FC = () => {
                         {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                       </button>
                     </div>
-                    <p className="text-xs text-gray-500 mt-2">Must be at least 6 characters long</p>
+                    
+                    {/* Password Requirements */}
+                    <div className={`mt-3 space-y-2 transition-all duration-200 ${
+                      passwordFocused || formData.password ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden'
+                    }`}>
+                      <p className="text-xs font-semibold text-gray-700 mb-2">Password must contain:</p>
+                      <div className="space-y-1.5">
+                        <div className="flex items-center space-x-2">
+                          {passwordValidation.hasMinLength ? (
+                            <Check className="h-4 w-4 text-green-500" />
+                          ) : (
+                            <X className="h-4 w-4 text-gray-400" />
+                          )}
+                          <span className={`text-xs ${
+                            passwordValidation.hasMinLength ? 'text-green-600 font-medium' : 'text-gray-500'
+                          }`}>
+                            At least 6 characters
+                          </span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          {passwordValidation.hasUpperCase ? (
+                            <Check className="h-4 w-4 text-green-500" />
+                          ) : (
+                            <X className="h-4 w-4 text-gray-400" />
+                          )}
+                          <span className={`text-xs ${
+                            passwordValidation.hasUpperCase ? 'text-green-600 font-medium' : 'text-gray-500'
+                          }`}>
+                            One uppercase letter (A-Z)
+                          </span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          {passwordValidation.hasSpecialChar ? (
+                            <Check className="h-4 w-4 text-green-500" />
+                          ) : (
+                            <X className="h-4 w-4 text-gray-400" />
+                          )}
+                          <span className={`text-xs ${
+                            passwordValidation.hasSpecialChar ? 'text-green-600 font-medium' : 'text-gray-500'
+                          }`}>
+                            One special character (!@#$%^&*)
+                          </span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
                   <div className="flex items-start space-x-3">

@@ -7,6 +7,7 @@ import reminderRoutes from "./routes/reminderRoutes";
 import bloodRequestRoutes from "./routes/bloodRequestRoutes";
 import notificationRoutes from './routes/notificationRoutes';
 import medicineRoutes from './routes/medicineRoutes';
+import statsRoutes from './routes/statsRoutes';
 import { notFound, errorHandler } from "./middleware/errorMiddleware";
 
 dotenv.config();
@@ -14,7 +15,8 @@ connectDB();
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '10mb' })); // Increase limit for profile photo uploads
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 // Root endpoint
 app.get("/", (req, res) => {
@@ -41,6 +43,7 @@ app.use("/api/reminders", reminderRoutes);
 app.use("/api/blood-requests", bloodRequestRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/medicines", medicineRoutes);
+app.use("/api/stats", statsRoutes);
 
 // Middleware
 app.use(notFound);

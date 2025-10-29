@@ -6,7 +6,6 @@ import { getCurrentUser } from '../utils/storage';
 import { bloodRequestsAPI } from '../services/api';
 import { Skeleton } from '../components/ui/skeleton';
 import { format } from 'date-fns';
-import toast from 'react-hot-toast';
 
 const bloodGroups = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 const urgencyLevels = [
@@ -38,7 +37,7 @@ const BloodBank: React.FC = () => {
         const allRequests = await bloodRequestsAPI.getActiveRequests();
         setRequests(allRequests.filter(req => req.status === 'active'));
       } catch (error) {
-        toast.error('Failed to load blood requests');
+        console.error('Failed to load blood requests:', error);
       } finally {
         setIsLoading(false);
       }
@@ -49,7 +48,6 @@ const BloodBank: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentUser) {
-      toast.error('Please log in to create a blood request');
       return;
     }
 
@@ -76,11 +74,7 @@ const BloodBank: React.FC = () => {
         hospitalName: '',
         unitsNeeded: 1
       });
-      
-      toast.success('Blood request created successfully! Notifications sent to compatible donors.');
     } catch (error: any) {
-      const errorMessage = error?.message || 'Failed to create blood request. Please try again.';
-      toast.error(errorMessage);
       console.error('Blood request error:', error);
     }
   };
@@ -92,11 +86,7 @@ const BloodBank: React.FC = () => {
       // Reload requests to remove the cancelled one
       const updatedRequests = await bloodRequestsAPI.getActiveRequests();
       setRequests(updatedRequests.filter(req => req.status === 'active'));
-      
-      toast.success('Blood request cancelled successfully. Notifications sent to donors.');
     } catch (error: any) {
-      const errorMessage = error?.message || 'Failed to cancel blood request. Please try again.';
-      toast.error(errorMessage);
       console.error('Cancel request error:', error);
     }
   };
@@ -138,16 +128,16 @@ const BloodBank: React.FC = () => {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
+        className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 transition-colors duration-200"
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="p-3 bg-red-100 rounded-full">
+            <div className="p-3 bg-red-100 dark:bg-red-900 rounded-full">
               <Droplets className="h-6 w-6 text-red-600" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Blood Bank & Donation</h1>
-              <p className="text-gray-600">Find blood donors and request blood donations</p>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Blood Bank & Donation</h1>
+              <p className="text-gray-600 dark:text-gray-300">Find blood donors and request blood donations</p>
             </div>
           </div>
           <motion.button
@@ -167,21 +157,21 @@ const BloodBank: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
+          className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 transition-colors duration-200"
         >
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Create Blood Request</h2>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">Create Blood Request</h2>
           
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Blood Group Needed
                 </label>
                 <select
                   required
                   value={formData.bloodGroup}
                   onChange={(e) => setFormData({ ...formData, bloodGroup: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                 >
                   <option value="">Select Blood Group</option>
                   {bloodGroups.map(group => (
@@ -191,13 +181,13 @@ const BloodBank: React.FC = () => {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Urgency Level
                 </label>
                 <select
                   value={formData.urgency}
                   onChange={(e) => setFormData({ ...formData, urgency: e.target.value as any })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                 >
                   {urgencyLevels.map(level => (
                     <option key={level.value} value={level.value}>{level.label}</option>
@@ -208,7 +198,7 @@ const BloodBank: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Hospital Name
                 </label>
                 <input
@@ -216,13 +206,13 @@ const BloodBank: React.FC = () => {
                   required
                   value={formData.hospitalName}
                   onChange={(e) => setFormData({ ...formData, hospitalName: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   placeholder="e.g., City General Hospital"
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Units Needed
                 </label>
                 <input
@@ -232,7 +222,7 @@ const BloodBank: React.FC = () => {
                   max="10"
                   value={formData.unitsNeeded}
                   onChange={(e) => setFormData({ ...formData, unitsNeeded: parseInt(e.target.value) })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                 />
               </div>
             </div>
@@ -293,10 +283,10 @@ const BloodBank: React.FC = () => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-lg shadow-sm border border-gray-200"
+        className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 transition-colors duration-200"
       >
-        <div className="p-6 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900">Active Blood Requests ({requests.length})</h2>
+        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Active Blood Requests ({requests.length})</h2>
         </div>
         
         {isLoading ? (
@@ -334,9 +324,9 @@ const BloodBank: React.FC = () => {
           </div>
         ) : requests.length === 0 ? (
           <div className="p-12 text-center">
-            <Droplets className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No Active Requests</h3>
-            <p className="text-gray-600">There are currently no active blood donation requests</p>
+            <Droplets className="h-16 w-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">No Active Requests</h3>
+            <p className="text-gray-600 dark:text-gray-300">There are currently no active blood donation requests</p>
           </div>
         ) : (
           <div className="divide-y divide-gray-200">
@@ -346,7 +336,7 @@ const BloodBank: React.FC = () => {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.1 }}
-                className="p-6 hover:bg-gray-50 transition-colors"
+                className="p-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -355,17 +345,17 @@ const BloodBank: React.FC = () => {
                         <Droplets className="h-5 w-5 text-red-600" />
                       </div>
                       <div>
-                        <h3 className="text-lg font-medium text-gray-900">
+                        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
                           {request.bloodGroup} Blood Needed
                         </h3>
-                        <p className="text-sm text-gray-600">Requested by {request.requesterName}</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-300">Requested by {request.requesterName}</p>
                       </div>
                       <span className={`px-3 py-1 rounded-full text-sm font-medium ${getUrgencyStyle(request.urgency)}`}>
                         {request.urgency.charAt(0).toUpperCase() + request.urgency.slice(1)}
                       </span>
                     </div>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm text-gray-600">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm text-gray-600 dark:text-gray-300">
                       <div className="flex items-center space-x-2">
                         <MapPin className="h-4 w-4" />
                         <span>{request.hospitalName}</span>
@@ -385,7 +375,7 @@ const BloodBank: React.FC = () => {
                     </div>
                     
                     <div className="mt-3 flex items-center space-x-4">
-                      <span className="text-sm font-medium text-gray-900">
+                      <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
                         Units needed: {request.unitsNeeded}
                       </span>
                       {currentUser && canDonate(request.bloodGroup, currentUser.bloodGroup) && (
@@ -426,7 +416,7 @@ const BloodBank: React.FC = () => {
                         const message = `I saw your blood donation request for ${request.bloodGroup} blood at ${request.hospitalName}. I would like to help.`;
                         window.open(`sms:${request.contactNumber}?body=${encodeURIComponent(message)}`, '_self');
                       }}
-                      className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm"
+                      className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-sm"
                     >
                       Send SMS
                     </motion.button>

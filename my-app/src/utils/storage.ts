@@ -52,6 +52,14 @@ export const logoutUser = (): void => {
   sessionStorage.removeItem('currentUser');
 };
 
+export const updateUser = (userData: Partial<User>): void => {
+  const currentUser = getCurrentUser();
+  if (currentUser) {
+    const updatedUser = { ...currentUser, ...userData };
+    saveUser(updatedUser);
+  }
+};
+
 // Reminders Management - Updated to use API
 export const saveReminder = async (reminder: Reminder): Promise<void> => {
   try {

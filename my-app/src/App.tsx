@@ -5,14 +5,19 @@ import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import LoginPage from './pages/auth/LoginPage';
 import SignupPage from './pages/auth/SignupPage';
+import ForgotPassword from './pages/auth/ForgotPassword';
 import AIAssistant from './pages/AIAssistant';
 import DrugChecker from './pages/DrugChecker';
 import MedicineLibrary from './pages/MedicineLibrary';
 import Reminders from './pages/Reminders';
 import BloodBank from './pages/BloodBank';
 import SymptomChecker from './pages/SymptomChecker';
+import Profile from './pages/Profile';
+import HelpCenter from './pages/HelpCenter';
+import ContactUs from './pages/ContactUs';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
+import NotFound from './pages/NotFound';
 import { getCurrentUser } from './utils/storage';
 import { getToken } from './services/api';
 
@@ -46,6 +51,11 @@ function App() {
               <SignupPage />
             </PublicRoute>
           } />
+          <Route path="/forgot-password" element={
+            <PublicRoute>
+              <ForgotPassword />
+            </PublicRoute>
+          } />
           
           {/* Legal Pages - Accessible to everyone */}
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
@@ -64,7 +74,13 @@ function App() {
             <Route path="reminders" element={<Reminders />} />
             <Route path="blood-bank" element={<BloodBank />} />
             <Route path="symptom-checker" element={<SymptomChecker />} />
+            <Route path="profile" element={<Profile />} />
+            <Route path="help" element={<HelpCenter />} />
+            <Route path="contact" element={<ContactUs />} />
           </Route>
+          
+          {/* 404 Not Found - Must be last */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>
       <Toaster 

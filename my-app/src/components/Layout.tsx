@@ -12,29 +12,30 @@ const Layout: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col transition-colors duration-200">
       {/* Navbar */}
       <Navbar onToggleSidebar={handleToggleSidebar} isSidebarOpen={isSidebarOpen} />
 
       <div className="flex pt-20 flex-1">
         {/* Sidebar */}
-        <Sidebar isSidebarOpen={isSidebarOpen} />
+        <Sidebar isSidebarOpen={isSidebarOpen} onClose={handleToggleSidebar} />
 
-        {/* Main Content */}
-        <main
-          className={`flex-1 p-6 transition-all duration-300 ${
-            isSidebarOpen ? 'ml-72' : 'ml-0'
+        {/* Main Content + Footer */}
+        <div
+          className={`flex-1 flex flex-col transition-all duration-300 ${
+            isSidebarOpen ? 'lg:ml-72' : 'ml-0'
           }`}
         >
-          <Outlet />
-        </main>
-      </div>
-      
-      {/* Footer */}
-      <Footer />                                                                             
+          <main className="flex-1 p-4 sm:p-6">
+            <Outlet />
+          </main>
+          
+          {/* Footer */}
+          <Footer />
+        </div>
+      </div>                                                                             
     </div>
   );
 };
 
 export default Layout;                                              
-                       
