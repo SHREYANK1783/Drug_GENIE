@@ -1,6 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
+import path from "path";
 import connectDB from "./config/db";
 import authRoutes from "./routes/authRoutes";
 import reminderRoutes from "./routes/reminderRoutes";
@@ -8,9 +9,11 @@ import bloodRequestRoutes from "./routes/bloodRequestRoutes";
 import notificationRoutes from './routes/notificationRoutes';
 import medicineRoutes from './routes/medicineRoutes';
 import statsRoutes from './routes/statsRoutes';
+import aiRoutes from './routes/aiRoutes';
 import { notFound, errorHandler } from "./middleware/errorMiddleware";
 
-dotenv.config();
+// Load .env file from the backend root directory
+dotenv.config({ path: path.join(process.cwd(), '.env') });
 connectDB();
 
 const app = express();
@@ -32,7 +35,8 @@ app.get("/", (req, res) => {
       auth: "/api/auth",
       reminders: "/api/reminders",
       bloodRequests: "/api/blood-requests",
-      notifications: "/api/notifications"
+      notifications: "/api/notifications",
+      ai: "/api/ai"
     }
   });
 });
@@ -44,6 +48,7 @@ app.use("/api/blood-requests", bloodRequestRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/medicines", medicineRoutes);
 app.use("/api/stats", statsRoutes);
+app.use("/api/ai", aiRoutes);
 
 // Middleware
 app.use(notFound);

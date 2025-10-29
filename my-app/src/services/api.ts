@@ -146,6 +146,29 @@ export const bloodRequestsAPI = {
   },
 };
 
+// AI Assistant API
+export const aiAPI = {
+  chat: async (message: string, conversationHistory?: any[]): Promise<{ success: boolean; response: string; timestamp: Date }> => {
+    return apiRequest('/api/ai/chat', {
+      method: 'POST',
+      body: JSON.stringify({ message, conversationHistory }),
+    });
+  },
+
+  getHistory: async (limit?: number, skip?: number): Promise<{ success: boolean; consultations: any[]; total: number }> => {
+    const params = new URLSearchParams();
+    if (limit) params.append('limit', limit.toString());
+    if (skip) params.append('skip', skip.toString());
+    return apiRequest(`/api/ai/history?${params.toString()}`);
+  },
+
+  clearHistory: async (): Promise<{ success: boolean; message: string; deletedCount: number }> => {
+    return apiRequest('/api/ai/history', {
+      method: 'DELETE',
+    });
+  },
+};
+
 // Axios-like API interface for compatibility
 export const api = {
   get: async (endpoint: string) => {
