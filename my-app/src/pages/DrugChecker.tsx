@@ -94,7 +94,8 @@ const DrugChecker: React.FC = () => {
 
       // Log the interaction check to backend
       try {
-        await fetch('http://localhost:5000/api/stats/log-interaction', {
+        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        await fetch(`${API_URL}/api/stats/log-interaction`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
