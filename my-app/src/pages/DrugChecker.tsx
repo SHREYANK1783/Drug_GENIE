@@ -9,7 +9,7 @@ const DrugChecker: React.FC = () => {
   const [currentMed, setCurrentMed] = useState('');
   const [interactions, setInteractions] = useState<DrugInteraction[]>([]);
   const [hasChecked, setHasChecked] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);           
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
