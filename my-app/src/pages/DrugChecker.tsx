@@ -13,7 +13,7 @@ const DrugChecker: React.FC = () => {
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const suggestionsRef = useRef<HTMLDivElement>(null);
+  const suggestionsRef = useRef<HTMLDivElement>(null);      
 
   // Handle input changes and show suggestions
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
