@@ -13,6 +13,7 @@ import {
   Activity,
 } from "lucide-react";
 import { loginUser } from "../../utils/storage";
+import toast from "react-hot-toast";
 
 const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -31,10 +32,13 @@ const LoginPage: React.FC = () => {
       const user = await loginUser(formData.email, formData.password);
 
       if (user) {
+        toast.success("Login successful! Welcome back.");
         navigate("/");
       }
     } catch (error: any) {
       console.error("Login error:", error);
+      // Show error toast with the error message
+      toast.error(error.message || "Invalid email or password. Please try again.");
     } finally {
       setIsLoading(false);
     }
