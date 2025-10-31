@@ -7,7 +7,7 @@ import { Skeleton } from '../components/ui/skeleton';
 const DrugChecker: React.FC = () => {
   const [medications, setMedications] = useState<string[]>([]);
   const [currentMed, setCurrentMed] = useState('');
-  const [interactions, setInteractions] = useState<DrugInteraction[]>([]);
+  const [interactions, setInteractions] = useState<DrugInteraction[]>([]);   
   const [hasChecked, setHasChecked] = useState(false);
   const [isLoading, setIsLoading] = useState(false);           
   const [suggestions, setSuggestions] = useState<string[]>([]);
