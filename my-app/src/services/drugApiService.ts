@@ -58,110 +58,154 @@ export interface ProcessedInteraction {
 class DrugApiService {
   private readonly RXNAV_BASE_URL = 'https://rxnav.nlm.nih.gov/REST';
   private readonly FDA_BASE_URL = 'https://api.fda.gov/drug/label.json';
+  
+  // Cache for RxCUI lookups to avoid redundant API calls
+  private rxcuiCache: Map<string, string | null> = new Map();
+  private interactionCache: Map<string, DrugInteractionResponse | null> = new Map();
+  
+  // Cache expiration time (1 hour) - Reserved for future cache expiration implementation
+  // Currently cache persists for the session lifetime
+  // TODO: Implement time-based cache invalidation
+  // private readonly CACHE_DURATION = 60 * 60 * 1000;
 
   /**
    * Get RxCUI (RxNorm Concept Unique Identifier) for a drug name with multiple search strategies
+   * Now with caching for faster repeated lookups
    */
   async getRxCui(drugName: string): Promise<string | null> {
+    const cacheKey = drugName.toLowerCase().trim();
+    
+    // Check cache first
+    if (this.rxcuiCache.has(cacheKey)) {
+      return this.rxcuiCache.get(cacheKey) || null;
+    }
+    
     try {
-      // Try exact match first
-      let response = await fetch(
-        `${this.RXNAV_BASE_URL}/rxcui.json?name=${encodeURIComponent(drugName)}&search=0`
-      );
+      // Try all search strategies in parallel for faster results
+      const searchPromises = [
+        // Exact match
+        fetch(`${this.RXNAV_BASE_URL}/rxcui.json?name=${encodeURIComponent(drugName)}&search=0`)
+          .then(r => r.ok ? r.json() : null),
+        // Approximate match
+        fetch(`${this.RXNAV_BASE_URL}/rxcui.json?name=${encodeURIComponent(drugName)}&search=1`)
+          .then(r => r.ok ? r.json() : null),
+        // Normalized search
+        fetch(`${this.RXNAV_BASE_URL}/rxcui.json?name=${encodeURIComponent(drugName)}&search=2`)
+          .then(r => r.ok ? r.json() : null)
+      ];
       
-      if (response.ok) {
-        const data: RxCuiResponse = await response.json();
-        if (data.idGroup?.rxnormId?.[0]) {
-          return data.idGroup.rxnormId[0];
+      const results = await Promise.allSettled(searchPromises);
+      
+      // Check results in order of preference
+      for (const result of results) {
+        if (result.status === 'fulfilled' && result.value) {
+          const data: RxCuiResponse = result.value;
+          if (data.idGroup?.rxnormId?.[0]) {
+            const rxcui = data.idGroup.rxnormId[0];
+            this.rxcuiCache.set(cacheKey, rxcui);
+            return rxcui;
+          }
         }
       }
 
-      // Try approximate match
-      response = await fetch(
-        `${this.RXNAV_BASE_URL}/rxcui.json?name=${encodeURIComponent(drugName)}&search=1`
-      );
-      
-      if (response.ok) {
-        const data: RxCuiResponse = await response.json();
-        if (data.idGroup?.rxnormId?.[0]) {
-          return data.idGroup.rxnormId[0];
+      // If no results, try spelling suggestions as fallback
+      try {
+        const spellingResponse = await fetch(
+          `${this.RXNAV_BASE_URL}/spellingsuggestions.json?name=${encodeURIComponent(drugName)}`
+        );
+        
+        if (spellingResponse.ok) {
+          const spellingData = await spellingResponse.json();
+          if (spellingData.suggestionGroup?.suggestionList?.suggestion?.[0]) {
+            const suggestion = spellingData.suggestionGroup.suggestionList.suggestion[0];
+            // Avoid infinite recursion by checking if suggestion is different
+            if (suggestion.toLowerCase() !== cacheKey) {
+              const rxcui = await this.getRxCui(suggestion);
+              if (rxcui) {
+                this.rxcuiCache.set(cacheKey, rxcui);
+                return rxcui;
+              }
+            }
+          }
         }
+      } catch (spellingError) {
+        console.error('Spelling suggestion error:', spellingError);
       }
 
-      // Try normalized search
-      response = await fetch(
-        `${this.RXNAV_BASE_URL}/rxcui.json?name=${encodeURIComponent(drugName)}&search=2`
-      );
-      
-      if (response.ok) {
-        const data: RxCuiResponse = await response.json();
-        if (data.idGroup?.rxnormId?.[0]) {
-          return data.idGroup.rxnormId[0];
-        }
-      }
-
-      // Try spelling suggestions
-      const spellingResponse = await fetch(
-        `${this.RXNAV_BASE_URL}/spellingsuggestions.json?name=${encodeURIComponent(drugName)}`
-      );
-      
-      if (spellingResponse.ok) {
-        const spellingData = await spellingResponse.json();
-        if (spellingData.suggestionGroup?.suggestionList?.suggestion?.[0]) {
-          const suggestion = spellingData.suggestionGroup.suggestionList.suggestion[0];
-          return await this.getRxCui(suggestion);
-        }
-      }
-
+      // Cache null result to avoid repeated failed lookups
+      this.rxcuiCache.set(cacheKey, null);
       return null;
     } catch (error) {
       console.error(`Error getting RxCUI for ${drugName}:`, error);
+      this.rxcuiCache.set(cacheKey, null);
       return null;
     }
   }
 
   /**
-   * Get drug interactions from RxNav API
+   * Get drug interactions from RxNav API with caching
    */
   async getDrugInteractions(rxcui: string): Promise<DrugInteractionResponse | null> {
+    // Check cache first
+    if (this.interactionCache.has(rxcui)) {
+      return this.interactionCache.get(rxcui) || null;
+    }
+    
     try {
       const response = await fetch(
-        `${this.RXNAV_BASE_URL}/interaction/interaction.json?rxcui=${rxcui}`
+        `${this.RXNAV_BASE_URL}/interaction/interaction.json?rxcui=${rxcui}`,
+        { 
+          signal: AbortSignal.timeout(10000) // 10 second timeout
+        }
       );
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
-      return await response.json();
+      const data = await response.json();
+      this.interactionCache.set(rxcui, data);
+      return data;
     } catch (error) {
       console.error(`Error getting interactions for RxCUI ${rxcui}:`, error);
+      this.interactionCache.set(rxcui, null);
       return null;
     }
   }
 
   /**
-   * Get drug information from FDA API
+   * Get drug information from FDA API with timeout and better error handling
    */
   async getFDADrugInfo(drugName: string): Promise<FDALabelResponse | null> {
     try {
       const response = await fetch(
-        `${this.FDA_BASE_URL}?search=openfda.generic_name:"${encodeURIComponent(drugName)}"&limit=5`
+        `${this.FDA_BASE_URL}?search=openfda.generic_name:"${encodeURIComponent(drugName)}"&limit=5`,
+        { 
+          signal: AbortSignal.timeout(8000) // 8 second timeout for FDA API
+        }
       );
       
       if (!response.ok) {
+        // FDA API often returns 404 for drugs not in their database
+        if (response.status === 404) {
+          return null;
+        }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
       return await response.json();
     } catch (error) {
-      console.error(`Error getting FDA info for ${drugName}:`, error);
+      // Don't log 404s as errors since they're expected for many drugs
+      if (error instanceof Error && !error.message.includes('404')) {
+        console.error(`Error getting FDA info for ${drugName}:`, error);
+      }
       return null;
     }
   }
 
   /**
    * Process and combine interaction data from multiple sources
+   * Optimized with parallel processing for faster results
    */
   async checkDrugInteractions(medications: string[]): Promise<ProcessedInteraction[]> {
     if (medications.length < 2) {
@@ -171,33 +215,76 @@ class DrugApiService {
     const interactions: ProcessedInteraction[] = [];
     const drugRxCuis: { [key: string]: string } = {};
 
-    // Get RxCUIs for all medications
-    for (const med of medications) {
+    // Get RxCUIs for all medications IN PARALLEL for faster fetching
+    const rxcuiPromises = medications.map(async (med) => {
       const rxcui = await this.getRxCui(med);
-      if (rxcui) {
-        drugRxCuis[med] = rxcui;
+      return { med, rxcui };
+    });
+    
+    const rxcuiResults = await Promise.allSettled(rxcuiPromises);
+    
+    // Store successful RxCUI lookups
+    rxcuiResults.forEach(result => {
+      if (result.status === 'fulfilled' && result.value.rxcui) {
+        drugRxCuis[result.value.med] = result.value.rxcui;
       }
-    }
+    });
 
-    // Check interactions between each pair of medications
+    // Check interactions between each pair of medications IN PARALLEL
+    const interactionPromises: Promise<ProcessedInteraction[]>[] = [];
+    
     for (let i = 0; i < medications.length; i++) {
       for (let j = i + 1; j < medications.length; j++) {
         const drug1 = medications[i];
         const drug2 = medications[j];
         
-        // Get RxNav interactions
+        // Create parallel promises for both RxNav and FDA checks
+        const promises: Promise<ProcessedInteraction[]>[] = [];
+        
+        // Get RxNav interactions if we have RxCUI
         if (drugRxCuis[drug1]) {
-          const rxnavInteractions = await this.getRxNavInteractions(
-            drug1, drug2, drugRxCuis[drug1]
+          promises.push(
+            this.getRxNavInteractions(drug1, drug2, drugRxCuis[drug1])
+              .catch(err => {
+                console.error('RxNav interaction error:', err);
+                return [];
+              })
           );
-          interactions.push(...rxnavInteractions);
+        }
+        
+        // Also check with drug2's RxCUI for bidirectional coverage
+        if (drugRxCuis[drug2]) {
+          promises.push(
+            this.getRxNavInteractions(drug2, drug1, drugRxCuis[drug2])
+              .catch(err => {
+                console.error('RxNav interaction error:', err);
+                return [];
+              })
+          );
         }
 
         // Get FDA information for additional context
-        const fdaInteractions = await this.getFDAInteractions(drug1, drug2);
-        interactions.push(...fdaInteractions);
+        promises.push(
+          this.getFDAInteractions(drug1, drug2)
+            .catch(err => {
+              console.error('FDA interaction error:', err);
+              return [];
+            })
+        );
+        
+        interactionPromises.push(...promises);
       }
     }
+
+    // Wait for all interaction checks to complete
+    const allResults = await Promise.allSettled(interactionPromises);
+    
+    // Collect all successful results
+    allResults.forEach(result => {
+      if (result.status === 'fulfilled' && result.value) {
+        interactions.push(...result.value);
+      }
+    });
 
     // Remove duplicates and sort by severity
     return this.deduplicateAndSort(interactions);
@@ -252,14 +339,17 @@ class DrugApiService {
   }
 
   /**
-   * Get FDA-based interactions and warnings
+   * Get FDA-based interactions and warnings with parallel fetching
    */
   private async getFDAInteractions(drug1: string, drug2: string): Promise<ProcessedInteraction[]> {
     const interactions: ProcessedInteraction[] = [];
     
     try {
-      const fdaData1 = await this.getFDADrugInfo(drug1);
-      const fdaData2 = await this.getFDADrugInfo(drug2);
+      // Fetch both FDA data in parallel for faster results
+      const [fdaData1, fdaData2] = await Promise.all([
+        this.getFDADrugInfo(drug1).catch(() => null),
+        this.getFDADrugInfo(drug2).catch(() => null)
+      ]);
 
       if (fdaData1?.results?.[0] && fdaData2?.results?.[0]) {
         const result1 = fdaData1.results[0];
@@ -364,5 +454,14 @@ class DrugApiService {
   }
 }
 
-export const drugApiService = new DrugApiService();   
+export const drugApiService = new DrugApiService();
+
+/**
+ * Clear the API service cache (useful for testing or when data needs to be refreshed)
+ */
+export const clearDrugApiCache = () => {
+  const service = drugApiService as any;
+  service.rxcuiCache?.clear();
+  service.interactionCache?.clear();
+};   
   
