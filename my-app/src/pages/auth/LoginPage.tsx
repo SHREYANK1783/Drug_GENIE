@@ -255,45 +255,8 @@ const LoginPage: React.FC = () => {
               </p>
             </div>
 
-            {/* Legal Links */}
-            <div className="mt-6 text-center">
-              <p className="text-xs text-gray-500">
-                By signing in, you agree to our{" "}
-                <a
-                  href="/terms-of-service"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 hover:text-blue-500 underline"
-                >
-                  Terms of Service
-                </a>
-                {" "}and{" "}
-                <a
-                  href="/privacy-policy"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 hover:text-blue-500 underline"
-                >
-                  Privacy Policy
-                </a>
-              </p>
-            </div>
           </div>
 
-          {/* Demo Credentials */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-            className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-200"
-          >
-            <p className="text-sm text-blue-800 font-medium mb-2">
-              Demo Credentials:
-            </p>
-            <p className="text-xs text-blue-700">
-              Create an account first, then use those credentials to login
-            </p>
-          </motion.div>
         </motion.div>
       </div>
     </div>
