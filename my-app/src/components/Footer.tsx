@@ -147,15 +147,6 @@ const Footer: React.FC = () => {
           </div>
         </div>
 
-        {/* Medical Disclaimer */}
-        <div className="mt-6 sm:mt-8 p-3 sm:p-4 bg-gray-800 rounded-lg">
-          <p className="text-gray-400 text-xs sm:text-sm leading-relaxed text-center sm:text-left">
-            <strong className="text-yellow-400">Medical Disclaimer:</strong> Drug GENIE is not a substitute for professional medical advice, 
-            diagnosis, or treatment. Always seek the advice of your physician or other qualified health provider with any questions 
-            you may have regarding a medical condition. Never disregard professional medical advice or delay in seeking it because 
-            of something you have read in our application.
-          </p>
-        </div>
       </div>
     </footer>
   );
