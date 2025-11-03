@@ -1,6 +1,6 @@
 import React from 'react';
 import { ArrowLeft } from 'lucide-react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const TermsOfService: React.FC = () => {
   const navigate = useNavigate();
@@ -13,11 +13,12 @@ const TermsOfService: React.FC = () => {
           <div className="flex items-center mb-4">
             <button
               onClick={() => {
-                if (window.history.length > 1) {
-                  navigate(-1);
-                } else {
-                  navigate('/signup');
-                }
+                // Ensure we return to Step 2 of signup
+                sessionStorage.setItem('signupCurrentStep', '2');
+                sessionStorage.setItem('returnToStep2', 'true');
+                
+                // Always navigate to /signup (don't use browser back)
+                navigate('/signup');
               }}
               className="flex items-center text-blue-600 hover:text-blue-800 transition-colors mr-4"
             >
@@ -26,19 +27,6 @@ const TermsOfService: React.FC = () => {
             </button>
             <div className="flex items-center space-x-4">
               <h1 className="text-3xl font-bold text-gray-900">Terms of Service</h1>
-              <Link
-                to="/signup"
-                onClick={() => {
-                  // Ensure we return to the correct step when going back to signup
-                  const savedStep = sessionStorage.getItem('signupCurrentStep');
-                  if (!savedStep) {
-                    sessionStorage.setItem('signupCurrentStep', '2');
-                  }
-                }}
-                className="text-sm bg-blue-100 text-blue-700 px-3 py-1 rounded-full hover:bg-blue-200 transition-colors"
-              >
-                Back to Signup
-              </Link>
             </div>
           </div>
           <p className="text-gray-600">Last updated: {new Date().toLocaleDateString()}</p>
