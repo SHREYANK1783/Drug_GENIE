@@ -19,6 +19,11 @@ const Layout: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col transition-colors duration-200">
+      {/* Skip to main content - for keyboard accessibility */}
+      <a href="#main-content" className="skip-to-main">
+        Skip to main content
+      </a>
+      
       {/* Navbar */}
       <Navbar onToggleSidebar={handleToggleSidebar} isSidebarOpen={isSidebarOpen} />
 
@@ -32,7 +37,7 @@ const Layout: React.FC = () => {
             isSidebarOpen ? 'lg:ml-72' : 'ml-0'
           }`}
         >
-          <main className="flex-1 p-4 sm:p-6">
+          <main id="main-content" className="flex-1 p-4 sm:p-6" role="main" aria-label="Main content">
             <Outlet />
           </main>
           
