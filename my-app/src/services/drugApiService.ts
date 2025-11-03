@@ -444,12 +444,12 @@ class DrugApiService {
       const key = `${interaction.drug1}-${interaction.drug2}-${interaction.description}`;
       if (seen.has(key)) return false;
       seen.add(key);
-      return true;
-    });
-
+      return true;                 
+    });                     
+        
     return unique.sort((a, b) => {
-      const severityOrder = { severe: 3, moderate: 2, mild: 1 };
-      return severityOrder[b.severity] - severityOrder[a.severity];
+      const severityOrder = { severe: 3, moderate: 2, mild: 1 };         
+      return severityOrder[b.severity] - severityOrder[a.severity]; 
     });
   }
 }
@@ -463,5 +463,4 @@ export const clearDrugApiCache = () => {
   const service = drugApiService as any;
   service.rxcuiCache?.clear();
   service.interactionCache?.clear();
-};   
-  
+};

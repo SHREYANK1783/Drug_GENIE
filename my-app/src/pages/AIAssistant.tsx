@@ -4,36 +4,68 @@ import { Send, Bot, User, Trash2 } from 'lucide-react';
 import { Skeleton } from '../components/ui/skeleton';
 import { ChatMessage } from '../types';
 import { getChatMessages, saveChatMessage, clearChatMessages } from '../utils/storage';
-import { getAIResponse } from '../utils/aiResponses';
+import { aiAPI } from '../services/api';
 import { v4 as uuidv4 } from 'uuid';
+import toast from 'react-hot-toast';
 
 const AIAssistant: React.FC = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [shouldScrollToBottom, setShouldScrollToBottom] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Aggressive scroll to top - multiple attempts
+    const scrollToTop = () => {
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+      
+      // Scroll main element
+      const mainElement = document.querySelector('main');
+      if (mainElement) {
+        mainElement.scrollTop = 0;
+      }
+      
+      // Scroll container
+      if (containerRef.current) {
+        containerRef.current.scrollTop = 0;
+      }
+    };
+    
+    // Immediate scroll
+    scrollToTop();
+    
+    // Scroll again after a tiny delay to ensure DOM is ready
+    setTimeout(scrollToTop, 0);
+    setTimeout(scrollToTop, 10);
+    setTimeout(scrollToTop, 50);
+    
     const loadMessages = async () => {
       setIsLoading(true);
-      // Simulate loading time for chat history
-      setTimeout(() => {
-        const savedMessages = getChatMessages();
-        setMessages(savedMessages);
-        setIsLoading(false);
-      }, 800);
+      const savedMessages = getChatMessages();
+      setMessages(savedMessages);
+      setIsLoading(false);
     };
     loadMessages();
   }, []);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    // Only scroll to bottom when explicitly requested (after sending/receiving messages)
+    if (shouldScrollToBottom && messagesContainerRef.current) {
+      // Scroll the messages container to bottom, not the whole page
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+      setShouldScrollToBottom(false);
+    }
+  }, [shouldScrollToBottom]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inputMessage.trim()) return;
+    if (!inputMessage.trim() || isTyping) return;
 
     const userMessage: ChatMessage = {
       id: uuidv4(),
@@ -42,42 +74,52 @@ const AIAssistant: React.FC = () => {
       timestamp: new Date()
     };
 
+    const currentInput = inputMessage;
     setMessages(prev => [...prev, userMessage]);
     saveChatMessage(userMessage);
     setInputMessage('');
     setIsTyping(true);
+    setShouldScrollToBottom(true);
 
-    // Simulate AI thinking time
-    setTimeout(async () => {
-      const aiResponse = getAIResponse(inputMessage);
+    try {
+      // Get conversation history for context
+      const conversationHistory = messages.map(msg => ({
+        type: msg.type,
+        content: msg.content
+      }));
+
+      // Call real Gemini API through backend
+      const response = await aiAPI.chat(currentInput, conversationHistory);
+      
       const aiMessage: ChatMessage = {
         id: uuidv4(),
         type: 'ai',
-        content: aiResponse,
+        content: response.response,
         timestamp: new Date()
       };
 
       setMessages(prev => [...prev, aiMessage]);
       saveChatMessage(aiMessage);
       setIsTyping(false);
+      setShouldScrollToBottom(true);
 
-      // Log the AI consultation to backend
-      try {
-        await fetch('http://localhost:5000/api/stats/log-consultation', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            question: inputMessage,
-            response: aiResponse,
-          }),
-        });
-      } catch (logError) {
-        console.error('Error logging consultation:', logError);
-        // Don't block the user if logging fails
-      }
-    }, 1500);
+    } catch (error: any) {
+      console.error('Error getting AI response:', error);
+      setIsTyping(false);
+      
+      // Show error message to user
+      const errorMessage: ChatMessage = {
+        id: uuidv4(),
+        type: 'ai',
+        content: `I apologize, but I'm having trouble connecting right now. ${error.message || 'Please try again in a moment.'}`,
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, errorMessage]);
+      saveChatMessage(errorMessage);
+      setShouldScrollToBottom(true);
+      toast.error('Failed to get AI response. Please try again.');
+    }
   };
 
   const handleClearChat = () => {
@@ -86,12 +128,12 @@ const AIAssistant: React.FC = () => {
   };
 
   return (
-    <div className="h-[calc(100vh-8rem)] flex flex-col">
+    <div ref={containerRef} className="flex flex-col max-h-[calc(100vh-10rem)]">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6 transition-colors duration-200"
+        className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6 transition-colors duration-200 flex-shrink-0"
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
@@ -114,8 +156,8 @@ const AIAssistant: React.FC = () => {
       </motion.div>
 
       {/* Chat Messages */}
-      <div className="flex-1 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col transition-colors duration-200">
-        <div className="flex-1 overflow-y-auto p-6 space-y-4">
+      <div className="flex-1 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col transition-colors duration-200 min-h-0">
+        <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-6 space-y-4 overscroll-contain scroll-smooth">
           {isLoading ? (
             <div className="space-y-4">
               {[1, 2, 3].map((i) => (
@@ -138,23 +180,7 @@ const AIAssistant: React.FC = () => {
             >
               <Bot className="h-16 w-16 text-purple-300 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">Welcome to AI Health Assistant</h3>
-              <p className="text-gray-600 dark:text-gray-300 mb-6">Ask me about symptoms, medications, or general health questions.</p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-2xl mx-auto">
-                {[
-                  "What should I do for a headache?",
-                  "How do I manage diabetes?",
-                  "Tell me about blood pressure",
-                  "What are common medication side effects?"
-                ].map((suggestion, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setInputMessage(suggestion)}
-                    className="p-3 text-left bg-purple-50 dark:bg-purple-900/30 hover:bg-purple-100 dark:hover:bg-purple-900/50 rounded-lg transition-colors text-sm text-gray-900 dark:text-gray-100"
-                  >
-                    {suggestion}
-                  </button>
-                ))}
-              </div>
+              <p className="text-gray-600 dark:text-gray-300">Ask me about symptoms, medications, or general health questions.</p>
             </motion.div>
           ) : (
             messages.map((message, index) => (
@@ -214,8 +240,8 @@ const AIAssistant: React.FC = () => {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input Form */}
-        <div className="border-t border-gray-200 dark:border-gray-700 p-4">
+        {/* Input Form - Fixed at bottom */}
+        <div className="border-t border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-800 flex-shrink-0">
           <form onSubmit={handleSendMessage} className="flex space-x-4">
             <input
               type="text"

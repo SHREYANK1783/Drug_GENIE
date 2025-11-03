@@ -7,13 +7,13 @@ import { Skeleton } from '../components/ui/skeleton';
 const DrugChecker: React.FC = () => {
   const [medications, setMedications] = useState<string[]>([]);
   const [currentMed, setCurrentMed] = useState('');
-  const [interactions, setInteractions] = useState<DrugInteraction[]>([]);
+  const [interactions, setInteractions] = useState<DrugInteraction[]>([]);   
   const [hasChecked, setHasChecked] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);           
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const suggestionsRef = useRef<HTMLDivElement>(null);
+  const suggestionsRef = useRef<HTMLDivElement>(null);      
 
   // Handle input changes and show suggestions
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -94,7 +94,8 @@ const DrugChecker: React.FC = () => {
 
       // Log the interaction check to backend
       try {
-        await fetch('http://localhost:5000/api/stats/log-interaction', {
+        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        await fetch(`${API_URL}/api/stats/log-interaction`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
