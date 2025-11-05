@@ -10,6 +10,8 @@ import notificationRoutes from './routes/notificationRoutes';
 import medicineRoutes from './routes/medicineRoutes';
 import statsRoutes from './routes/statsRoutes';
 import aiRoutes from './routes/aiRoutes';
+import healthScoreRoutes from './routes/healthScoreRoutes';
+import activityRoutes from './routes/activityRoutes';
 import { notFound, errorHandler } from "./middleware/errorMiddleware";
 
 // Load .env file from the backend root directory
@@ -49,6 +51,8 @@ app.use("/api/notifications", notificationRoutes);
 app.use("/api/medicines", medicineRoutes);
 app.use("/api/stats", statsRoutes);
 app.use("/api/ai", aiRoutes);
+app.use("/api/health-score", healthScoreRoutes);
+app.use("/api/activities", activityRoutes);
 
 // Middleware
 app.use(notFound);

@@ -9,12 +9,15 @@ import {
   Shield,
   BookOpen,
   Droplets,
-  Activity,
   Calendar,
 } from "lucide-react";
 import { getCurrentUser } from "../utils/storage";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import { getHealthScore, HealthScoreData } from "../services/healthScoreApi";
+import { getToken } from "../services/api";
+import { getRecentActivities, Activity } from "../services/activityApi";
+import { getActivityIcon, getActivityColor, formatActivityTime } from "../utils/activityHelpers";
 
 const statsConfig = [
   {
@@ -78,32 +81,7 @@ const quickActions = [
   },
 ];
 
-const recentActivities = [
-  {
-    action: "AI consultation completed",
-    time: "2 minutes ago",
-    type: "success",
-    icon: Bot,
-  },
-  {
-    action: "Medicine reminder set for Aspirin",
-    time: "1 hour ago",
-    type: "info",
-    icon: Clock,
-  },
-  {
-    action: "Blood donation request sent",
-    time: "3 hours ago",
-    type: "warning",
-    icon: Droplets,
-  },
-  {
-    action: "Drug interaction check performed",
-    time: "5 hours ago",
-    type: "success",
-    icon: Shield,
-  },
-];
+// Real-time activities are now fetched from the API
 
 const Dashboard: React.FC = () => {
   const currentUser = getCurrentUser();
@@ -113,11 +91,52 @@ const Dashboard: React.FC = () => {
     aiConsultations: 0,
     bloodRequests: 0,
   });
+  const [healthScore, setHealthScore] = useState<HealthScoreData | null>(null);
+  const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
+  const [healthScoreLoading, setHealthScoreLoading] = useState(true);
+  const [activitiesLoading, setActivitiesLoading] = useState(true);
 
   useEffect(() => {
     fetchDashboardStats();
+    fetchHealthScore();
+    fetchActivities();
+    
+    // Refresh activities every 30 seconds for real-time updates
+    const interval = setInterval(() => {
+      fetchActivities();
+    }, 30000);
+    
+    return () => clearInterval(interval);
   }, []);
+
+  const fetchHealthScore = async () => {
+    try {
+      const token = getToken();
+      if (token) {
+        const data = await getHealthScore(token);
+        setHealthScore(data);
+      }
+    } catch (error) {
+      console.error('Error fetching health score:', error);
+    } finally {
+      setHealthScoreLoading(false);
+    }
+  };
+
+  const fetchActivities = async () => {
+    try {
+      const token = getToken();
+      if (token) {
+        const data = await getRecentActivities(token, 10);
+        setActivities(data);
+      }
+    } catch (error) {
+      console.error('Error fetching activities:', error);
+    } finally {
+      setActivitiesLoading(false);
+    }
+  };
 
   const fetchDashboardStats = async () => {
     try {
@@ -225,7 +244,7 @@ const Dashboard: React.FC = () => {
           className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-100 dark:border-gray-700 transition-colors duration-200"
         >
           <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6 flex items-center">
-            <Activity className="h-5 w-5 mr-2 text-blue-500" />
+            <TrendingUp className="h-5 w-5 mr-2 text-blue-500" />
             Quick Actions
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -269,41 +288,109 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
 
-          <div className="text-center mb-6">
-            <div className="text-4xl font-bold text-green-600 mb-2">85%</div>
-            <p className="text-sm text-gray-600 dark:text-gray-300">Excellent health management</p>
-          </div>
+          {healthScoreLoading ? (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto"></div>
+              <p className="text-sm text-gray-500 mt-2">Calculating...</p>
+            </div>
+          ) : healthScore !== null ? (
+            <>
+              <div className="text-center mb-6">
+                <div className={`text-4xl font-bold mb-2 ${
+                  healthScore.overallScore >= 80 ? 'text-green-600' :
+                  healthScore.overallScore >= 60 ? 'text-yellow-600' :
+                  healthScore.overallScore > 0 ? 'text-orange-600' :
+                  'text-gray-600'
+                }`}>
+                  {healthScore.overallScore}%
+                </div>
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  {healthScore.overallScore >= 80 ? 'Excellent health management' :
+                   healthScore.overallScore >= 60 ? 'Good progress, keep improving' :
+                   healthScore.overallScore > 0 ? 'Just getting started' :
+                   'Start your health journey'}
+                </p>
+                {healthScore.engagementStreak > 0 && (
+                  <div className="mt-2 inline-flex items-center px-3 py-1 bg-orange-100 dark:bg-orange-900/30 rounded-full">
+                    <span className="text-sm font-semibold text-orange-600">
+                      🔥 {healthScore.engagementStreak} day streak!
+                    </span>
+                  </div>
+                )}
+              </div>
 
-          <div className="space-y-3">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-600 dark:text-gray-300">Medication Adherence</span>
-              <span className="font-semibold text-green-600">92%</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div
-                className="bg-green-500 h-2 rounded-full"
-                style={{ width: "92%" }}
-              ></div>
-            </div>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600 dark:text-gray-300">Activity Level</span>
+                  <span className={`font-semibold ${
+                    healthScore.activityLevel >= 80 ? 'text-green-600' :
+                    healthScore.activityLevel >= 50 ? 'text-yellow-600' :
+                    'text-orange-600'
+                  }`}>
+                    {healthScore.activityLevel}%
+                  </span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div
+                    className={`h-2 rounded-full ${
+                      healthScore.activityLevel >= 80 ? 'bg-green-500' :
+                      healthScore.activityLevel >= 50 ? 'bg-yellow-500' :
+                      'bg-orange-500'
+                    }`}
+                    style={{ width: `${healthScore.activityLevel}%` }}
+                  ></div>
+                </div>
 
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-600 dark:text-gray-300">Health Checkups</span>
-              <span className="font-semibold text-blue-600">78%</span>
-            </div>
-            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-              <div
-                className="bg-blue-500 h-2 rounded-full"
-                style={{ width: "78%" }}
-              ></div>
-            </div>
-          </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600 dark:text-gray-300">Daily Consistency</span>
+                  <span className="font-semibold text-blue-600">{healthScore.loggingConsistency}%</span>
+                </div>
+                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                  <div
+                    className="bg-blue-500 h-2 rounded-full"
+                    style={{ width: `${healthScore.loggingConsistency}%` }}
+                  ></div>
+                </div>
 
-          <div className="mt-4 p-3 bg-white dark:bg-gray-800 rounded-lg">
-            <p className="text-xs text-gray-600 dark:text-gray-300">
-              💡 <strong>Tip:</strong> Set more reminders to improve your
-              medication adherence score!
-            </p>
-          </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600 dark:text-gray-300">Feature Usage</span>
+                  <span className="font-semibold text-indigo-600">{healthScore.featureDiversity}%</span>
+                </div>
+                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                  <div
+                    className="bg-indigo-500 h-2 rounded-full"
+                    style={{ width: `${healthScore.featureDiversity}%` }}
+                  ></div>
+                </div>
+
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600 dark:text-gray-300">Engagement Streak</span>
+                  <span className="font-semibold text-purple-600">{healthScore.engagementStreak} days</span>
+                </div>
+              </div>
+
+              {healthScore.insights.length > 0 && (
+                <div className="mt-4 p-3 bg-white dark:bg-gray-800 rounded-lg">
+                  <p className="text-xs text-gray-600 dark:text-gray-300">
+                    💡 <strong>Insight:</strong> {healthScore.insights[0]}
+                  </p>
+                </div>
+              )}
+
+              {healthScore.recommendations.length > 0 && (
+                <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                  <p className="text-xs text-blue-600 dark:text-blue-400">
+                    📌 <strong>Tip:</strong> {healthScore.recommendations[0]}
+                  </p>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-sm text-gray-500">No health data available yet</p>
+              <p className="text-xs text-gray-400 mt-2">Start tracking your medications to see your score</p>
+            </div>
+          )}
         </motion.div>
       </div>
 
@@ -317,53 +404,58 @@ const Dashboard: React.FC = () => {
         <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6 flex items-center">
           <Clock className="h-5 w-5 mr-2 text-orange-500" />
           Recent Activity
+          <span className="ml-auto text-xs font-normal text-gray-500">Live updates</span>
         </h2>
-        <div className="space-y-4">
-          {recentActivities.map((activity, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.1 * index }}
-              className="flex items-center space-x-4 p-4 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-            >
-              <div
-                className={`p-2 rounded-lg ${
-                  activity.type === "success"
-                    ? "bg-green-100"
-                    : activity.type === "warning"
-                    ? "bg-yellow-100"
-                    : "bg-blue-100"
-                }`}
-              >
-                <activity.icon
-                  className={`h-4 w-4 ${
-                    activity.type === "success"
-                      ? "text-green-600"
-                      : activity.type === "warning"
-                      ? "text-yellow-600"
-                      : "text-blue-600"
-                  }`}
-                />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                  {activity.action}
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">{activity.time}</p>
-              </div>
-              <div
-                className={`w-2 h-2 rounded-full ${
-                  activity.type === "success"
-                    ? "bg-green-500"
-                    : activity.type === "warning"
-                    ? "bg-yellow-500"
-                    : "bg-blue-500"
-                }`}
-              ></div>
-            </motion.div>
-          ))}
-        </div>
+        {activitiesLoading ? (
+          <div className="text-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto"></div>
+            <p className="text-sm text-gray-500 mt-2">Loading activities...</p>
+          </div>
+        ) : activities.length > 0 ? (
+          <div className="space-y-4">
+            {activities.map((activity, index) => {
+              const Icon = getActivityIcon(activity.activityType);
+              const colors = getActivityColor(activity.activityType);
+              
+              return (
+                <motion.div
+                  key={activity._id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.05 * index }}
+                  className="flex items-center space-x-4 p-4 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                >
+                  <div className={`p-2 rounded-lg ${colors.bg}`}>
+                    <Icon className={`h-4 w-4 ${colors.text}`} />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                        {activity.action}
+                      </p>
+                      <span className="text-xs text-gray-400">•</span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                        {activity.userName}
+                      </span>
+                    </div>
+                    {activity.details && (
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{activity.details}</p>
+                    )}
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                      {formatActivityTime(activity.timestamp)}
+                    </p>
+                  </div>
+                  <div className={`w-2 h-2 rounded-full ${colors.bg.includes('green') ? 'bg-green-500' : colors.bg.includes('red') ? 'bg-red-500' : 'bg-blue-500'}`}></div>
+                </motion.div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="text-center py-8">
+            <p className="text-sm text-gray-500">No recent activity</p>
+            <p className="text-xs text-gray-400 mt-2">Start using features to see your activity here</p>
+          </div>
+        )}
       </motion.div>
     </div>
   );

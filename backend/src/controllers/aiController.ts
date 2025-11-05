@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import AIConsultationLog from '../models/aiConsultationLogModel';
+import { logActivity } from './activityController';
 
 // System prompt for health assistant
 const SYSTEM_PROMPT = `You are a specialized AI health assistant for Drug GENIE, a healthcare application. You ONLY answer questions related to health, medicine, and wellness.
@@ -96,6 +97,19 @@ export const chatWithAI = async (req: Request, res: Response) => {
     } catch (logError) {
       console.error('Error logging AI consultation:', logError);
       // Don't fail the request if logging fails
+    }
+
+    // Log activity
+    const user = (req as any).user;
+    if (user) {
+      await logActivity(
+        userId,
+        user.name || 'User',
+        'ai_consultation',
+        'AI consultation completed',
+        `Asked: "${message.substring(0, 50)}${message.length > 50 ? '...' : ''}"`,
+        { questionLength: message.length, responseLength: aiResponse.length }
+      );
     }
 
     res.json({

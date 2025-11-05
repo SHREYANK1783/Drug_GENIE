@@ -3,11 +3,12 @@ import { motion } from 'framer-motion';
 import { Shield, Plus, X, AlertTriangle, CheckCircle, AlertCircle, Loader2, Search } from 'lucide-react';
 import { checkDrugInteractions, getSeverityColor, DrugInteraction, getMedicineSuggestions } from '../utils/drugInteractions';
 import { Skeleton } from '../components/ui/skeleton';
+import { logUserActivity, ActivityTypes } from '../services/activityLogger';
 
 const DrugChecker: React.FC = () => {
   const [medications, setMedications] = useState<string[]>([]);
   const [currentMed, setCurrentMed] = useState('');
-  const [interactions, setInteractions] = useState<DrugInteraction[]>([]);
+  const [interactions, setInteractions] = useState<DrugInteraction[]>([]);   
   const [hasChecked, setHasChecked] = useState(false);
   const [isLoading, setIsLoading] = useState(false);           
   const [suggestions, setSuggestions] = useState<string[]>([]);
@@ -105,6 +106,17 @@ const DrugChecker: React.FC = () => {
             interactionsFound: foundInteractions.length,
           }),
         });
+
+        // Log activity for recent activity feed
+        await logUserActivity(
+          ActivityTypes.DRUG_INTERACTION,
+          'Drug interaction check performed',
+          `Checked: ${medications.join(' + ')}`,
+          {
+            medications: medications,
+            interactionCount: foundInteractions.length
+          }
+        );
       } catch (logError) {
         console.error('Error logging interaction:', logError);
         // Don't block the user if logging fails
