@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import Medicine from '../models/medicineModel';
+import { logActivity } from './activityController';
 
 // Get medicine by name
 export const getMedicineByName = async (req: Request, res: Response) => {
@@ -23,6 +24,19 @@ export const getMedicineByName = async (req: Request, res: Response) => {
         success: false,
         message: 'Medicine not found',
       });
+    }
+
+    // Log activity
+    const user = (req as any).user;
+    if (user) {
+      await logActivity(
+        user._id.toString(),
+        user.name || 'User',
+        'medicine_search',
+        'Medicine information viewed',
+        `Viewed: ${medicine.NAME}`,
+        { medicineName: medicine.NAME }
+      );
     }
 
     res.status(200).json({
@@ -67,6 +81,19 @@ export const searchMedicines = async (req: Request, res: Response) => {
         { $text: { $search: query as string } }
       ]
     }).limit(10).select('NAME INTRODUCTION');
+
+    // Log activity
+    const user = (req as any).user;
+    if (user) {
+      await logActivity(
+        user._id.toString(),
+        user.name || 'User',
+        'medicine_search',
+        'Medicine search performed',
+        `Searched for: "${query}"`,
+        { searchQuery: query, resultsCount: medicines.length }
+      );
+    }
 
     res.status(200).json({
       success: true,
