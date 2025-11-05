@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import { Send, Bot, User, Trash2 } from 'lucide-react';
 import { Skeleton } from '../components/ui/skeleton';
 import { ChatMessage } from '../types';
-import { getChatMessages, saveChatMessage, clearChatMessages } from '../utils/storage';
 import { aiAPI } from '../services/api';
 import { v4 as uuidv4 } from 'uuid';
 import toast from 'react-hot-toast';
@@ -47,8 +46,36 @@ const AIAssistant: React.FC = () => {
     
     const loadMessages = async () => {
       setIsLoading(true);
-      const savedMessages = getChatMessages();
-      setMessages(savedMessages);
+      try {
+        // Load chat history from backend (user-specific)
+        const historyResponse = await aiAPI.getHistory(100); // Get last 100 messages
+        
+        // Convert backend consultation logs to chat messages
+        const loadedMessages: ChatMessage[] = [];
+        historyResponse.consultations.forEach((consultation: any) => {
+          // Add user question
+          loadedMessages.push({
+            id: consultation._id + '-q',
+            type: 'user',
+            content: consultation.question,
+            timestamp: new Date(consultation.createdAt)
+          });
+          // Add AI response
+          loadedMessages.push({
+            id: consultation._id + '-a',
+            type: 'ai',
+            content: consultation.response,
+            timestamp: new Date(consultation.createdAt)
+          });
+        });
+        
+        // Reverse to show oldest first
+        setMessages(loadedMessages.reverse());
+      } catch (error) {
+        console.error('Error loading chat history:', error);
+        // Start with empty messages if loading fails
+        setMessages([]);
+      }
       setIsLoading(false);
     };
     loadMessages();
@@ -76,7 +103,7 @@ const AIAssistant: React.FC = () => {
 
     const currentInput = inputMessage;
     setMessages(prev => [...prev, userMessage]);
-    saveChatMessage(userMessage);
+    // Don't save to localStorage - backend will save it
     setInputMessage('');
     setIsTyping(true);
     setShouldScrollToBottom(true);
@@ -99,7 +126,7 @@ const AIAssistant: React.FC = () => {
       };
 
       setMessages(prev => [...prev, aiMessage]);
-      saveChatMessage(aiMessage);
+      // Don't save to localStorage - backend already saved it
       setIsTyping(false);
       setShouldScrollToBottom(true);
 
@@ -116,15 +143,22 @@ const AIAssistant: React.FC = () => {
       };
       
       setMessages(prev => [...prev, errorMessage]);
-      saveChatMessage(errorMessage);
+      // Don't save error messages to backend
       setShouldScrollToBottom(true);
       toast.error('Failed to get AI response. Please try again.');
     }
   };
 
-  const handleClearChat = () => {
-    setMessages([]);
-    clearChatMessages();
+  const handleClearChat = async () => {
+    try {
+      // Clear chat history from backend (user-specific)
+      await aiAPI.clearHistory();
+      setMessages([]);
+      toast.success('Chat history cleared');
+    } catch (error) {
+      console.error('Error clearing chat history:', error);
+      toast.error('Failed to clear chat history');
+    }
   };
 
   return (
