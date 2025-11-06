@@ -19,7 +19,12 @@ dotenv.config({ path: path.join(process.cwd(), '.env') });
 connectDB();
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: true, // Allow all origins in production
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json({ limit: '10mb' })); // Increase limit for profile photo uploads
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
