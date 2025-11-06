@@ -65,7 +65,7 @@ const deleteReminder = expressAsyncHandler(async (req: AuthRequest, res: Respons
   }
 
   // Check if reminder belongs to user
-  if (reminder.userId.toString() !== req.user?._id.toString()) {
+  if (reminder.userId.toString() !== req.user?._id?.toString()) {
     res.status(401);
     throw new Error('Not authorized to delete this reminder');
   }

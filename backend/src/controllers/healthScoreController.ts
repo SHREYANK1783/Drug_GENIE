@@ -2,6 +2,7 @@ import expressAsyncHandler from 'express-async-handler';
 import { Response } from 'express';
 import { AuthRequest } from '../middleware/authMiddleware';
 import ActivityLog from '../models/activityLogModel';
+import MedicationLog from '../models/medicationLogModel';
 
 /**
  * Health Score Calculation Logic (No Reminders/Scheduling):
@@ -27,16 +28,25 @@ import ActivityLog from '../models/activityLogModel';
 
 interface HealthScoreData {
   overallScore: number;
-  activityLevel: number;
-  loggingConsistency: number;
-  featureDiversity: number;
-  engagementStreak: number;
-  totalActivities: number;
-  activeDays: number;
-  featuresUsed: string[];
+  activityLevel?: number;
+  loggingConsistency?: number;
+  featureDiversity?: number;
+  engagementStreak?: number;
+  totalActivities?: number;
+  activeDays?: number;
+  featuresUsed?: string[];
+  medicationAdherence?: number;
+  timeliness?: number;
+  consistency?: number;
+  currentStreak?: number;
+  totalMedications?: number;
+  takenMedications?: number;
+  missedMedications?: number;
+  skippedMedications?: number;
   insights: string[];
   recommendations: string[];
   lastActivityDate?: string;
+  lastLogDate?: string;
 }
 
 // Calculate medication adherence score
