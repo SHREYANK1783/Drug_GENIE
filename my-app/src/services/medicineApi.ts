@@ -1,6 +1,13 @@
 import axios from 'axios';
+import { getToken } from './api';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api` : 'http://localhost:5000/api';
+
+// Helper to get auth headers
+const getAuthHeaders = () => {
+  const token = getToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
 
 export interface MedicineData {
   name: string;
@@ -34,7 +41,8 @@ export interface ApiResponse<T> {
 export const searchMedicines = async (query: string): Promise<MedicineSearchResult[]> => {
   try {
     const response = await axios.get<ApiResponse<MedicineSearchResult[]>>(
-      `${API_BASE_URL}/medicines/search?query=${encodeURIComponent(query)}`
+      `${API_BASE_URL}/medicines/search?query=${encodeURIComponent(query)}`,
+      { headers: getAuthHeaders() }
     );
     return response.data.data || [];
   } catch (error) {
@@ -47,7 +55,8 @@ export const searchMedicines = async (query: string): Promise<MedicineSearchResu
 export const getMedicineByName = async (name: string): Promise<MedicineData | null> => {
   try {
     const response = await axios.get<ApiResponse<MedicineData>>(
-      `${API_BASE_URL}/medicines/${encodeURIComponent(name)}`
+      `${API_BASE_URL}/medicines/${encodeURIComponent(name)}`,
+      { headers: getAuthHeaders() }
     );
     return response.data.data || null;
   } catch (error) {
@@ -65,7 +74,8 @@ export const getAllMedicines = async (page: number = 1, limit: number = 10): Pro
 }> => {
   try {
     const response = await axios.get<ApiResponse<MedicineSearchResult[]>>(
-      `${API_BASE_URL}/medicines?page=${page}&limit=${limit}`
+      `${API_BASE_URL}/medicines?page=${page}&limit=${limit}`,
+      { headers: getAuthHeaders() }
     );
     return {
       medicines: response.data.data || [],

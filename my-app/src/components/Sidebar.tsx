@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useLocation } from 'react-router-dom';
 import { 
@@ -11,6 +11,8 @@ import {
   LayoutDashboard,
   Activity,
 } from 'lucide-react';
+import { getHealthScore, HealthScoreData } from '../services/healthScoreApi';
+import { getToken } from '../services/api';
 
 interface SidebarProps {
   isSidebarOpen: boolean;
@@ -29,6 +31,26 @@ const navigationItems = [
 
 const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, onClose }) => {
   const location = useLocation();
+  const [healthScore, setHealthScore] = useState<HealthScoreData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchHealthScore();
+  }, []);
+
+  const fetchHealthScore = async () => {
+    try {
+      const token = getToken();
+      if (token) {
+        const data = await getHealthScore(token);
+        setHealthScore(data);
+      }
+    } catch (error) {
+      console.error('Error fetching health score:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <>
@@ -118,18 +140,41 @@ const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, onClose }) => {
             </div>
             <h3 className="font-semibold text-gray-900 dark:text-gray-100">Health Score</h3>
           </div>
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-600 dark:text-gray-300">Overall</span>
-              <span className="font-semibold text-green-600">85%</span>
+          {loading ? (
+            <div className="text-center py-4">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
             </div>
-            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-              <div className="bg-gradient-to-r from-green-400 to-blue-500 h-2 rounded-full w-4/5"></div>
+          ) : healthScore !== null ? (
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600 dark:text-gray-300">Overall</span>
+                <span className={`font-semibold ${
+                  healthScore.overallScore >= 80 ? 'text-green-600' :
+                  healthScore.overallScore >= 60 ? 'text-yellow-600' :
+                  'text-red-600'
+                }`}>
+                  {healthScore.overallScore}%
+                </span>
+              </div>
+              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                <div 
+                  className={`h-2 rounded-full ${
+                    healthScore.overallScore >= 80 ? 'bg-gradient-to-r from-green-400 to-blue-500' :
+                    healthScore.overallScore >= 60 ? 'bg-gradient-to-r from-yellow-400 to-orange-500' :
+                    'bg-gradient-to-r from-red-400 to-orange-500'
+                  }`}
+                  style={{ width: `${healthScore.overallScore}%` }}
+                ></div>
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                {healthScore.insights[0] || 'Keep tracking your medications!'}
+              </p>
             </div>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-              Great job! Keep taking your medications on time.
+          ) : (
+            <p className="text-xs text-gray-500 text-center py-2">
+              No data available
             </p>
-          </div>
+          )}
         </motion.div>
 
         {/* Quick Actions */}

@@ -1,26 +1,41 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import ScrollToTop from './components/ScrollToTop';
 import Layout from './components/Layout';
-import Dashboard from './pages/Dashboard';
-import LoginPage from './pages/auth/LoginPage';
-import SignupPage from './pages/auth/SignupPage';
-import ForgotPassword from './pages/auth/ForgotPassword';
-import AIAssistant from './pages/AIAssistant';
-import DrugChecker from './pages/DrugChecker';
-import MedicineLibrary from './pages/MedicineLibrary';
-import Reminders from './pages/Reminders';
-import BloodBank from './pages/BloodBank';
-import SymptomChecker from './pages/SymptomChecker';
-import Profile from './pages/Profile';
-import HelpCenter from './pages/HelpCenter';
-import ContactUs from './pages/ContactUs';
-import PrivacyPolicy from './pages/PrivacyPolicy';
-import TermsOfService from './pages/TermsOfService';
-import NotFound from './pages/NotFound';
 import { getCurrentUser } from './utils/storage';
 import { getToken } from './services/api';
+import { Skeleton } from './components/ui/skeleton';
+
+// Lazy load pages for better performance
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const LoginPage = lazy(() => import('./pages/auth/LoginPage'));
+const SignupPage = lazy(() => import('./pages/auth/SignupPage'));
+const ForgotPassword = lazy(() => import('./pages/auth/ForgotPassword'));
+const AIAssistant = lazy(() => import('./pages/AIAssistant'));
+const DrugChecker = lazy(() => import('./pages/DrugChecker'));
+const MedicineLibrary = lazy(() => import('./pages/MedicineLibrary'));
+const Reminders = lazy(() => import('./pages/Reminders'));
+const BloodBank = lazy(() => import('./pages/BloodBank'));
+const SymptomChecker = lazy(() => import('./pages/SymptomChecker'));
+const Profile = lazy(() => import('./pages/Profile'));
+const HelpCenter = lazy(() => import('./pages/HelpCenter'));
+const ContactUs = lazy(() => import('./pages/ContactUs'));
+const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
+const TermsOfService = lazy(() => import('./pages/TermsOfService'));
+const NotFound = lazy(() => import('./pages/NotFound'));
+
+// Loading fallback component
+const PageLoader = () => (
+  <div className="min-h-screen p-6 space-y-6">
+    <Skeleton className="h-12 w-64" />
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <Skeleton className="h-48 w-full" />
+      <Skeleton className="h-48 w-full" />
+      <Skeleton className="h-48 w-full" />
+    </div>
+  </div>
+);
 
 // Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -41,7 +56,8 @@ function App() {
     <>
       <Router>
         <ScrollToTop />
-        <Routes>
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
           {/* Public Routes */}
           <Route path="/login" element={
             <PublicRoute>
@@ -84,6 +100,7 @@ function App() {
           {/* 404 Not Found - Must be last */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        </Suspense>
       </Router>
       <Toaster 
         position="top-right"

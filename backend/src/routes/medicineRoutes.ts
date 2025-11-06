@@ -4,8 +4,12 @@ import {
   searchMedicines,
   getAllMedicines,
 } from '../controllers/medicineController';
+import { protect } from '../middleware/authMiddleware';
 
 const router = express.Router();
+
+// Apply authentication to all routes
+router.use(protect);
 
 // GET /api/medicines/search?query=medicine_name - Search medicines by partial name
 router.get('/search', searchMedicines);

@@ -52,6 +52,8 @@ const registerUser = expressAsyncHandler(async (req: Request, res: Response) => 
         age: user.age,
         bloodGroup: user.bloodGroup,
         gender: user.gender,
+        phone: user.phone,
+        profilePhoto: user.profilePhoto,
         createdAt: user.createdAt,
       },
       token: generateToken((user._id as any).toString()),
@@ -78,6 +80,8 @@ const loginUser = expressAsyncHandler(async (req: Request, res: Response) => {
         age: user.age,
         bloodGroup: user.bloodGroup,
         gender: user.gender,
+        phone: user.phone,
+        profilePhoto: user.profilePhoto,
         createdAt: user.createdAt,
       },
       token: generateToken((user._id as any).toString()),
@@ -135,6 +139,7 @@ const updateUserProfile = expressAsyncHandler(async (req: AuthRequest, res: Resp
     bloodGroup: updatedUser.bloodGroup,
     gender: updatedUser.gender,
     phone: updatedUser.phone,
+    profilePhoto: updatedUser.profilePhoto,
     createdAt: updatedUser.createdAt,
   });
 });

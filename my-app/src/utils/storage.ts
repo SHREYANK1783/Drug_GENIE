@@ -16,15 +16,15 @@ export const getUsers = (): User[] => {
   return usersStr ? JSON.parse(usersStr) : [];
 };
 
-export const loginUser = async (email: string, password: string): Promise<User | null> => {
+export const loginUser = async (email: string, password: string): Promise<User> => {
   try {
     const response = await authAPI.login({ email, password });
     setToken(response.token);
     saveUser(response.user);
     return response.user;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Login failed:', error);
-    return null;
+    throw new Error(error.response?.data?.message || error.message || 'Invalid email or password');
   }
 };
 
@@ -35,15 +35,16 @@ export const registerUser = async (userData: {
   age: number;
   bloodGroup: string;
   gender: string;
-}): Promise<User | null> => {
+}): Promise<User> => {
   try {
     const response = await authAPI.register(userData);
     setToken(response.token);
     saveUser(response.user);
     return response.user;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Registration failed:', error);
-    return null;
+    // Throw error with proper message for UI to catch
+    throw new Error(error.response?.data?.message || error.message || 'Registration failed. Please try again.');
   }
 };
 

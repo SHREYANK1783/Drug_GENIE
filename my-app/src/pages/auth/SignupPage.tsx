@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Heart, Eye, EyeOff, Mail, Lock, User, Calendar, Droplets, ArrowRight, CheckCircle, Check, X } from 'lucide-react';
 import { registerUser } from '../../utils/storage';
+import toast from 'react-hot-toast';
 
 const bloodGroups = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 
@@ -11,6 +12,7 @@ const SignupPage: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [passwordFocused, setPasswordFocused] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
   
   // Initialize with completely empty form - no persistence
   const [formData, setFormData] = useState({
@@ -22,6 +24,7 @@ const SignupPage: React.FC = () => {
     password: '',
   });
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Smart initialization - preserve data when returning from legal pages
   useEffect(() => {
@@ -29,58 +32,83 @@ const SignupPage: React.FC = () => {
     const savedStep = sessionStorage.getItem('signupCurrentStep');
     const returnToStep2 = sessionStorage.getItem('returnToStep2');
     
-    // If returning from legal pages, restore data
-    if (returnToStep2 === 'true' || savedFormData) {
-      console.log(' RESTORING DATA FROM LEGAL PAGE NAVIGATION');
+    console.log('🔍 SignupPage useEffect - Checking sessionStorage:', {
+      returnToStep2,
+      savedStep,
+      hasSavedFormData: !!savedFormData,
+      currentStep
+    });
+    
+    // Priority 1: If explicitly returning to Step 2 from legal pages
+    if (returnToStep2 === 'true') {
+      console.log('✅ RETURNING TO STEP 2 FROM LEGAL PAGE');
       
+      // Restore form data if available
       if (savedFormData) {
         try {
           const parsedData = JSON.parse(savedFormData);
           setFormData(parsedData);
-          
-          if (parsedData.email || parsedData.password) {
-            setCurrentStep(2);
-          }
+          console.log('📝 Form data restored:', parsedData);
         } catch (error) {
           console.error('Error parsing saved data:', error);
         }
       }
       
-      if (returnToStep2 === 'true') {
+      // Set step AFTER form data to avoid race condition
+      setTimeout(() => {
         setCurrentStep(2);
         sessionStorage.removeItem('returnToStep2');
-      } else if (savedStep && parseInt(savedStep) >= 1 && parseInt(savedStep) <= 2) {
-        setCurrentStep(parseInt(savedStep));
-      }
-    } else {
-      // New user - clear everything and start fresh
-      console.log(' NEW USER - STARTING FRESH');
-      sessionStorage.clear();
-      localStorage.clear();
-      
-      setFormData({
-        name: '',
-        age: '',
-        bloodGroup: '',
-        gender: '',
-        email: '',
-        password: '',
-      });
-      setCurrentStep(1);
+        setIsInitialized(true);
+        console.log('✅ Step set to 2');
+      }, 0);
+      return;
     }
-  }, []);
+    
+    // Priority 2: If there's saved form data, restore it
+    if (savedFormData) {
+      console.log('📝 RESTORING SAVED FORM DATA');
+      try {
+        const parsedData = JSON.parse(savedFormData);
+        setFormData(parsedData);
+        
+        // If email or password exists, go to Step 2
+        if (parsedData.email || parsedData.password) {
+          setCurrentStep(2);
+        }
+      } catch (error) {
+        console.error('Error parsing saved data:', error);
+      }
+      setIsInitialized(true);
+      return;
+    }
+    
+    // Priority 3: Check saved step
+    if (savedStep && parseInt(savedStep) >= 1 && parseInt(savedStep) <= 2) {
+      console.log('📍 RESTORING SAVED STEP:', savedStep);
+      setCurrentStep(parseInt(savedStep));
+      setIsInitialized(true);
+      return;
+    }
+    
+    // Default: New user - start fresh
+    console.log('🆕 NEW USER - STARTING FRESH');
+    setCurrentStep(1);
+    setIsInitialized(true);
+  }, [location.key]); // Re-run when navigation changes
 
   // Save form data when user enters information
   useEffect(() => {
-    if (formData.name || formData.age || formData.email || formData.password) {
+    if (isInitialized && (formData.name || formData.age || formData.email || formData.password)) {
       sessionStorage.setItem('signupFormData', JSON.stringify(formData));
     }
-  }, [formData]);
+  }, [formData, isInitialized]);
 
-  // Save current step
+  // Save current step (only after initialization)
   useEffect(() => {
-    sessionStorage.setItem('signupCurrentStep', currentStep.toString());
-  }, [currentStep]);
+    if (isInitialized) {
+      sessionStorage.setItem('signupCurrentStep', currentStep.toString());
+    }
+  }, [currentStep, isInitialized]);
 
   // Clear saved data on successful registration
   const clearSavedData = () => {
@@ -106,10 +134,13 @@ const SignupPage: React.FC = () => {
       
       if (newUser) {
         clearSavedData(); // Clear saved form data on successful registration
+        toast.success('Account created successfully! Welcome to Drug GENIE.');
         navigate('/');
       }
     } catch (error: any) {
       console.error('Registration error:', error);
+      // Show error toast with the error message
+      toast.error(error.message || 'Registration failed. Please try again.');
     } finally {
       setIsLoading(false);
     }

@@ -140,16 +140,37 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, isSidebarOpen }) => {
             <div className="relative group">
               <motion.div
                 whileHover={{ scale: 1.05 }}
-                className="h-10 w-10 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center cursor-pointer shadow-lg"
+                className="h-10 w-10 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center cursor-pointer shadow-lg overflow-hidden"
               >
-                <User className="h-5 w-5 text-white" />
+                {currentUser?.profilePhoto ? (
+                  <img 
+                    src={currentUser.profilePhoto} 
+                    alt={currentUser.name}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <User className="h-5 w-5 text-white" />
+                )}
               </motion.div>
               
               {/* Dropdown Menu */}
               <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                <div className="p-3 border-b border-gray-100 dark:border-gray-700">
-                  <p className="font-semibold text-gray-900 dark:text-gray-100">{currentUser?.name}</p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">{currentUser?.email}</p>
+                <div className="p-3 border-b border-gray-100 dark:border-gray-700 flex items-center space-x-3">
+                  <div className="h-12 w-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
+                    {currentUser?.profilePhoto ? (
+                      <img 
+                        src={currentUser.profilePhoto} 
+                        alt={currentUser.name}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <User className="h-6 w-6 text-white" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-gray-900 dark:text-gray-100 truncate">{currentUser?.name}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{currentUser?.email}</p>
+                  </div>
                 </div>
                 <div className="p-2">
                   <button
