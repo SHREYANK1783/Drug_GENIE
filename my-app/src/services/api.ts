@@ -1,6 +1,10 @@
 import { User, Reminder, BloodRequest } from '../types';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+// Use empty string for local dev (Vite proxy handles it)
+// Use full URL for production
+const API_BASE_URL = import.meta.env.PROD 
+  ? (import.meta.env.VITE_API_URL || 'http://localhost:5000')
+  : ''; // Empty string uses Vite proxy in development
 
 // Token management - Use sessionStorage for tab isolation
 export const getToken = (): string | null => {

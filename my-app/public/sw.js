@@ -3,7 +3,7 @@
  * Provides offline support and caching
  */
 
-const CACHE_NAME = 'drug-genie-v1';
+const CACHE_NAME = 'drug-genie-v2-no-api-cache';
 const OFFLINE_URL = '/offline.html';
 
 // Assets to cache on install
@@ -60,6 +60,11 @@ self.addEventListener('fetch', (event) => {
   
   // Skip chrome-extension and other non-http(s) requests
   if (!event.request.url.startsWith('http')) return;
+  
+  // NEVER cache API requests - always fetch fresh
+  if (event.request.url.includes('/api/')) {
+    return; // Let browser handle API requests normally
+  }
   
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
