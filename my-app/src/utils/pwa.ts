@@ -8,8 +8,15 @@ let deferredPrompt: any = null;
 /**
  * Register service worker
  * Call this once when the app starts
+ * DISABLED IN DEVELOPMENT to prevent caching issues
  */
 export const registerServiceWorker = async () => {
+  // DISABLE service worker in development mode
+  if (import.meta.env.DEV) {
+    console.log('🚫 Service Worker disabled in development mode');
+    return;
+  }
+  
   if ('serviceWorker' in navigator) {
     try {
       const registration = await navigator.serviceWorker.register('/sw.js', {
