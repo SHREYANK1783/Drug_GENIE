@@ -41,3 +41,9 @@ node_modules/.vite/
 
 # Ignore database connection attempts
 database connection attempt-1 
+
+# Deployment files
+vercel.json
+netlify.toml
+.vercel/
+.netlify/
