@@ -9,7 +9,7 @@ interface EmptyStateProps {
   actionLabel?: string;
   onAction?: () => void;
   secondaryActionLabel?: string;
-  onSecondaryAction?: () => void;       
+  onSecondaryAction?: () => void;            
 }
 
 const EmptyState: React.FC<EmptyStateProps> = ({
